@@ -136,3 +136,45 @@ def isFree(loc, obstacle_map):
   y = loc[1]
   map_size = obstacle_map.shape
   return (x >= 0) and (x < map_size[0]) and (y >= 0) and (y < map_size[1]) and not bool(obstacle_map[y, x])
+
+def init_map(num_rows,row_size):
+  #Fill the orchard with trees, used for testing purposes
+  m=np.zeros((row_size+2,num_rows*2-1))
+  # m=np.arange(((num_rows*2)*(row_size+2)))
+  # m=m.reshape((num_rows*2,row_size+2))
+
+  #make every other row full of trees
+  m[:,0::2]=np.ones((m[:,0::2].shape[0],m[:,0::2].shape[1]))
+  return m
+
+#def getCurrentMap from the simulator, which builds a map of 1s and 0s
+#from the state of the map
+def getCurrentMap(simulatorMap):
+  #Returns a map of 1s and 0s based on obstacles in the env
+  #Build 1s and 0s for the terrain type
+  terrain=(simulatorMap.terrain_type<=0)
+  #build 1s and 0s for the bots in the rows
+  bot_fill_locations=(len(simulatorMap.bots)>0)
+  #cancel out the bots who are in the headlands b/c we assume infinite width
+  bot_fill_locations[0]=np.zeros(len(bot_fill_locations[0]))
+  bot_fill_locations[-1]=np.zeros(len(bot_fill_locations[-1]))
+
+  for i in range(bot_fill_locations.shape[1]):
+    row=bot_fill_locations[:,i]
+    if(sum(row)>0):
+      #if there is a bot in a row, block the entire row
+      bot_fill_locations[:,i]=np.ones(len(row))
+
+  #finally we concantenate all of the occupancies
+  final_map=terrain+bot_fill_locations
+
+  return final_map
+
+
+
+
+
+if __name__=='__main__':
+  init_map=init_map(5,8)
+
+  # astar2d()
