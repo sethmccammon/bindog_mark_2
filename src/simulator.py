@@ -7,54 +7,79 @@ import random
 
 class simulator(object):
   """docstring for simulator"""
-  def __init__(self, num_rows, row_size, num_bots, num_bins, num_workers):
+  def __init__(self, num_rows, row_size, num_bots, num_bins, num_wkrs):
     #random init
 
     self.num_rows = num_rows
     self.row_size = row_size
 
-    self.orchard_map = None
+    self.orchard_map = [[None for ii in range(row_size+2)] for jj in range(2*self.num_rows+1)]
+
+    for row_id, row in enumerate(self.orchard_map):
+      for spot_id, spot in enumerate(row):
+        if spot_id == 0:
+          #self.orchard_map[row_id][spot_id] = "depot"
+          self.orchard_map[row_id][spot_id] = cell("depot")
+        elif spot_id == len(row)-1:
+          self.orchard_map[row_id][spot_id] = cell("headlands")
+          #self.orchard_map[row_id][spot_id] = "headlands"
+        else:
+          if row_id%2 == 0:
+            self.orchard_map[row_id][spot_id] = cell("orchard")
+            #self.orchard_map[row_id][spot_id] = "orchard"
+          else:
+            self.orchard_map[row_id][spot_id] = cell("path")
+            #self.orchard_map[row_id][spot_id] = "path"
 
     self.wkrs = {}
     self.bots = {}
     self.bins = {}
 
-
+    self.num_bins = num_bins
     self.collected_bins = 0
     self.profit = 0
 
+    # for ii in range(num_wkrs):
+    while len(self.wkrs) < num_wkrs:
+      worker_loc = [random.randint(0, num_rows-1)*2+1, 1+random.randint(0, row_size-1)]
+      for worker in self.wkrs:
+        if worker_loc == self.wkrs[worker].loc:
+          break
+      else:
+        self.wkrs[len(self.wkrs)] = workerGroup(worker_loc)
+
+    while len(self.bots) < num_bots:
+      bot_loc = [random.randint(0, num_rows*2+1), 0]
+      for bot in self.bots:
+        if bot_loc == self.bots[bot].loc:
+          break
+      else:
+        self.bots[len(self.bots)] = bindog(bot_loc)
+
+    for ii, worker in enumerate(self.wkrs):
+      self.bins[ii] = orchardBin(self.wkrs[worker].loc)
 
 
-
-    for ii in range(num_wkrs):
-      worker_loc = [random.randint(0, num_rows-1), 1+random.randint(0*row_size)]
-      self.wkrs.append(workerGroup(worker_loc))
-
-    for ii in range(num_bots):
-      #where should the robots start?
-      bot_loc = [1, 0]
-      self.bots[ii] = bindog(bot_loc)
-
-    for ii in range(num_bins):
-      bin_loc = [0, 0]
-      self.bins[ii] = orchardBin(bin_loc)
 
 
   def drawSimulator(self):
     scale = 10
-    img_size = [(num_rows*2+1)*scale, row_size+2*scale]
+    img_size = [(self.num_rows*2+1)*scale, self.row_size+2*scale]
     fig1 = plt.figure()
     ax1 = plt.gca()
-    # axes.se
 
-    plt.xlim((-.5, (num_rows*2+.5)))
-    plt.ylim((-.5, row_size+1.5))
-    #ax1 = fig1.add_subplot(111, aspect='equal')
+    plt.xlim((-.5, (self.num_rows*2+.5)))
+    plt.ylim((-.5, self.row_size+1.5))
 
-    for row in range(0, num_rows*2+1, 2):
-      for col in range(1, row_size+1):
-        ax1.add_patch(patches.Rectangle((row-.5, col-.5), 1., 1., facecolor="#228b22"))
-        plt.plot(row, col, 'go')
+    for row_id, row in enumerate(self.orchard_map):
+      for col_id, item in enumerate(row):
+        if item.terrain == "orchard":
+          ax1.add_patch(patches.Rectangle((row_id-.5, col_id-.5), 1., 1., facecolor="#228b22"))
+        elif item.terrain == "headlands":
+          ax1.add_patch(patches.Rectangle((row_id-.5, col_id-.5), 1., 1., facecolor="#776b46"))
+        elif item.terrain == "depot":
+          ax1.add_patch(patches.Rectangle((row_id-.5, col_id-.5), 1., 1., facecolor="#ffc000"))
+
 
     for bot in self.bots:
       drawBindog(ax1, self.bots[bot])
@@ -63,20 +88,46 @@ class simulator(object):
       loc = self.wkrs[worker].loc
       ax1.add_patch(patches.Rectangle((loc[0]-.45, loc[1]-.45), .9, .9, facecolor="#c0ffee"))
 
+    for bin in self.bins:
+      drawBin(ax1, self.bins[bin])
+
     plt.show()
 
 
+  def getIdleBots(self):
+    # Function which returns a list of idle robots in the simulator
+    idle_bots = []
+
+    for key, item in self.bots.iteritems():
+      if item.status == "idle":
+        idle_bots.append(key)
+
+    return idle_bots
 
 
+  def getBinPickupRequests(self):
+    res = []
 
-  def step():
     for worker in self.wkrs:
-      local_bin = bins[worker.loc]
-      worker.pickFruit()
-      #bot takes an action
-      self.moveBot
+      if self.wkrs[worker].pickup:
+        res.append(self.wkrs[worker.loc])
+
+    return res
 
 
+  def getBinDeliveryRequests(self):
+    res = []
+
+    for worker in self.wkrs:
+      if self.wkrs[worker].delivery:
+        res.append(self.wkrs[worker.loc])
+        
+    return res
+
+
+def drawBin(ax1, bin_in):
+  loc = bin_in.loc
+  ax1.add_patch(patches.Rectangle((loc[0]-.3, loc[1]-.3), .6, .6, facecolor="purple"))
 
 def drawBindog(ax1, bot):
   loc = bot.loc
@@ -91,9 +142,19 @@ def drawBindog(ax1, bot):
 
 class cell(object):
   """docstring for cell"""
-  def __init__(self, arg):
-    super(cell, self).__init__()
-    self.arg = arg
+  def __init__(self, terrain):
+    self.terrain = terrain
+    
+    if self.terrain is not 'orchard':
+      self.bins = []
+      self.wkrs = []
+      self.bots = []
+      self.apples = None
+    else:
+      self.bins = None
+      self.bots = None
+      self.wkrs = None
+      self.apples = .9 + .2*random.random()
     
 
 
@@ -144,23 +205,34 @@ class orchardBin(object):
 
 class workerGroup(object):
   """docstring for workerGroup"""
-  def __init__(self, loc, rate):
+  def __init__(self, loc):
     self.loc = loc
+    self.pickup = False
+    self.delivery = False
 
   def pickFruit(self, orchardBin):
     if self.loc == orchardBin.loc:
-      orchardBin.capacity += .1 * random.random() #randomly fill up to 10% of a bin
+      amount_picked = .1 + .1 * random.random()
+      orchardBin.capacity +=  amount_picked #randomly fill up to 10% of a bin
       orchardBin.capacity = min(1.0, orchardBin.capacity)
 
-    
-    
+  def pickupRequest(self):
+    self.pickup = True
+
+  def deliveryRequest(self):
+    self.delivery = True
+  
     
     
 if __name__ == '__main__':
-  num_rows = 10
-  row_size = 10
-  num_bots = 1
-  num_bins = 0
-  num_wkrs = 0
-  sim = simulator(num_rows, row_size, num_bots, num_bins, num_workers)
+  # num_rows = 10
+  # row_size = 10
+  # num_bots = 5
+  # num_bins = 30
+  # num_wkrs = 5
+  sim = simulator(10, 10, 5, 30, 5)
+
+
+
+
   sim.drawSimulator()

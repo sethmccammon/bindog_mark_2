@@ -1,5 +1,7 @@
 #this one is for you, dylan
 
+import math
+
 def euclideanDist(p1, p2):
   if p1 == p2:
     return 0
