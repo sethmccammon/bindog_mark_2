@@ -110,7 +110,7 @@ class simulator(object):
 
     for worker in self.wkrs:
       if self.wkrs[worker].pickup:
-        res.append(self.wkrs[worker.loc])
+        res.append(self.wkrs[worker].loc)
 
     return res
 
@@ -191,6 +191,9 @@ class bindog(object):
     self.loc = self.loc + action # need to define action
     if self.bin is not None:
       self.bin.loc = self.loc
+  
+  def hasBin(self):
+    return self.bin is not None
 
 
 
