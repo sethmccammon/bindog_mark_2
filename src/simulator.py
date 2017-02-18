@@ -19,25 +19,29 @@ class simulator(object):
     self.bots = {}
     self.bins = {}
 
-
+    self.num_bins = num_bins
     self.collected_bins = 0
     self.profit = 0
 
 
-
-
-    for ii in range(num_wkrs):
-      worker_loc = [random.randint(0, num_rows-1), 1+random.randint(0*row_size)]
-      self.wkrs.append(workerGroup(worker_loc))
+    # for ii in range(num_wkrs):
+    while len(self.wkrs) < num_wkrs:
+      worker_loc = [random.randint(0, num_rows-1)*2+1, 1+random.randint(0, row_size-1)]
+      for worker in self.wkrs:
+        if worker_loc == self.wkrs[worker].loc:
+          break
+      else:
+        self.wkrs[len(self.wkrs)] = workerGroup(worker_loc)
 
     for ii in range(num_bots):
       #where should the robots start?
-      bot_loc = [1, 0]
+      bot_loc = [0, 0]
       self.bots[ii] = bindog(bot_loc)
 
-    for ii in range(num_bins):
-      bin_loc = [0, 0]
-      self.bins[ii] = orchardBin(bin_loc)
+    for ii, worker in enumerate(self.wkrs):
+      self.bins[ii] = orchardBin(self.wkrs[worker].loc)
+
+
 
 
   def drawSimulator(self):
@@ -63,20 +67,46 @@ class simulator(object):
       loc = self.wkrs[worker].loc
       ax1.add_patch(patches.Rectangle((loc[0]-.45, loc[1]-.45), .9, .9, facecolor="#c0ffee"))
 
+    for bin in self.bins:
+      drawBin(ax1, self.bins[bin])
+
     plt.show()
 
 
+  def getIdleBots(self):
+    # Function which returns a list of idle robots in the simulator
+    idle_bots = []
+
+    for key, item in self.bots.iteritems():
+      if item.status == "idle":
+        idle_bots.append(key)
+
+    return idle_bots
 
 
+  def getBinPickupRequests(self):
+    res = []
 
-  def step():
     for worker in self.wkrs:
-      local_bin = bins[worker.loc]
-      worker.pickFruit()
-      #bot takes an action
-      self.moveBot
+      if self.wkrs[worker].pickup:
+        res.append(self.wkrs[worker.loc])
+
+    return res
 
 
+  def getBinDeliveryRequests(self):
+    res = []
+
+    for worker in self.wkrs:
+      if self.wkrs[worker].delivery:
+        res.append(self.wkrs[worker.loc])
+        
+    return res
+
+
+def drawBin(ax1, bin_in):
+  loc = bin_in.loc
+  ax1.add_patch(patches.Rectangle((loc[0]-.3, loc[1]-.3), .6, .6, facecolor="purple"))
 
 def drawBindog(ax1, bot):
   loc = bot.loc
@@ -144,23 +174,33 @@ class orchardBin(object):
 
 class workerGroup(object):
   """docstring for workerGroup"""
-  def __init__(self, loc, rate):
+  def __init__(self, loc):
     self.loc = loc
+    self.pickup = False
+    self.delivery = False
 
   def pickFruit(self, orchardBin):
     if self.loc == orchardBin.loc:
       orchardBin.capacity += .1 * random.random() #randomly fill up to 10% of a bin
       orchardBin.capacity = min(1.0, orchardBin.capacity)
 
-    
-    
+  def pickupRequest(self):
+    self.pickup = True
+
+  def deliveryRequest(self):
+    self.delivery = True
+  
     
     
 if __name__ == '__main__':
   num_rows = 10
   row_size = 10
-  num_bots = 1
+  num_bots = 5
   num_bins = 0
-  num_wkrs = 0
-  sim = simulator(num_rows, row_size, num_bots, num_bins, num_workers)
+  num_wkrs = 15
+  sim = simulator(num_rows, row_size, num_bots, num_bins, num_wkrs)
+
+
+
+
   sim.drawSimulator()
