@@ -13,7 +13,7 @@ class simulator(object):
     self.num_rows = num_rows
     self.row_size = row_size
 
-    self.orchard_map = [[None for ii in range(row_size+2)] for jj in range(2*num_rows+1)]
+    self.orchard_map = [[None for ii in range(row_size+2)] for jj in range(2*self.num_rows+1)]
 
     for row_id, row in enumerate(self.orchard_map):
       for spot_id, spot in enumerate(row):
@@ -64,12 +64,12 @@ class simulator(object):
 
   def drawSimulator(self):
     scale = 10
-    img_size = [(num_rows*2+1)*scale, row_size+2*scale]
+    img_size = [(self.num_rows*2+1)*scale, self.row_size+2*scale]
     fig1 = plt.figure()
     ax1 = plt.gca()
 
-    plt.xlim((-.5, (num_rows*2+.5)))
-    plt.ylim((-.5, row_size+1.5))
+    plt.xlim((-.5, (self.num_rows*2+.5)))
+    plt.ylim((-.5, self.row_size+1.5))
 
     for row_id, row in enumerate(self.orchard_map):
       for col_id, item in enumerate(row):
@@ -225,12 +225,12 @@ class workerGroup(object):
     
     
 if __name__ == '__main__':
-  num_rows = 10
-  row_size = 10
-  num_bots = 5
-  num_bins = 30
-  num_wkrs = 5
-  sim = simulator(num_rows, row_size, num_bots, num_bins, num_wkrs)
+  # num_rows = 10
+  # row_size = 10
+  # num_bots = 5
+  # num_bins = 30
+  # num_wkrs = 5
+  sim = simulator(10, 10, 5, 30, 5)
 
 
 
