@@ -191,6 +191,9 @@ class bindog(object):
     self.loc = self.loc + action # need to define action
     if self.bin is not None:
       self.bin.loc = self.loc
+  
+  def hasBin(self):
+    return self.bin is not None
 
 
 
@@ -207,7 +210,7 @@ class workerGroup(object):
   """docstring for workerGroup"""
   def __init__(self, loc):
     self.loc = loc
-    self.pickup = True
+    self.pickup = False
     self.delivery = False
 
   def pickFruit(self, orchardBin):

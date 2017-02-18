@@ -41,14 +41,18 @@ class coordinator():
 		for loc in goals:
 			
 			if idle_bots != []:
-				c_bot = findClosestBot(loc, idle_bots, simulator)
-				if simulator.bots[c_bot].bin != None:
+				c_bot = self.findClosestBot(loc, idle_bots, simulator)
+				print simulator.bots[c_bot].loc
+				print loc
+				if simulator.bots[c_bot].hasBin():
 					task_allocation.append([c_bot, [loc]])
 				else:
 					# Getting a bin then moving to goal location
 					r_loc = simulator.bots[c_bot].loc
 					r_loc = [r_loc[0],0]
 					task_allocation.append([c_bot, [r_loc,loc]])
+
+				idle_bots.remove(c_bot)
 
 
 		return task_allocation
@@ -59,17 +63,20 @@ class coordinator():
 		return None
 
 
-	def findClosestBot(loc, bots, simulator):
+	def findClosestBot(self, loc, bots, simulator):
 		# Probably need to write different distance function - not manhattan but up and down + sideways
 		dist = float('inf')
 		c_bot = None
 
 		for item in bots:
-			d = manhattanDist(loc, simulator.bots[item])
+
+			d = manhattanDist(loc, simulator.bots[item].loc)
 
 			if d < dist:
 				dist = d
-				c_bin = item
+				c_bot = item
+
+		return c_bot
 
 if __name__ == '__main__':
 
