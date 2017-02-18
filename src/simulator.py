@@ -13,14 +13,22 @@ class simulator(object):
     self.num_rows = num_rows
     self.row_size = row_size
 
+    self.orchard_map = None
 
-    self.workers = []
+    self.wkrs = []
     self.bots = {}
     self.bins = {}
 
-    for ii in range(num_workers):
+
+    self.collected_bins = 0
+    self.profit = 0
+
+
+
+
+    for ii in range(num_wkrs):
       worker_loc = [random.randint(0, num_rows-1), random.randint(0*row_size)]
-      self.workers.append(workerGroup(worker_loc))
+      self.wkrs.append(workerGroup(worker_loc))
 
     for ii in range(num_bots):
       #where should the robots start?
@@ -49,8 +57,7 @@ class simulator(object):
         plt.plot(row, col, 'go')
 
     for bot in self.bots:
-      loc = self.bots[bot].loc
-      ax1.add_patch(patches.Rectangle((loc[0]-.25, loc[1]-.25), .5, .5, facecolor="#7b9095"))
+      drawBindog(ax1, self.bots[bot])
 
     plt.show()
 
@@ -59,11 +66,22 @@ class simulator(object):
 
 
   def step():
-    for worker in self.workers:
+    for worker in self.wkrs:
       local_bin = bins[worker.loc]
       worker.pickFruit()
       #bot takes an action
       self.moveBot
+
+
+
+def drawBindog(ax1, bot):
+  loc = bot.loc
+  ax1.add_patch(patches.Rectangle((loc[0]-.25, loc[1]-.25), .5, .5, facecolor="#7b9095"))
+  ax1.add_patch(patches.Circle((loc[0]-.25, loc[1]-.25), .1, color='k'))
+  ax1.add_patch(patches.Circle((loc[0]+.25, loc[1]-.25), .1, color='k'))
+  if bot.bin is not None:
+    ax1.add_patch(patches.Rectangle((loc[0]-.2, loc[1]-.2), .4, .4, facecolor="k"))
+
 
 
 
@@ -72,6 +90,7 @@ class bindog(object):
   def __init__(self, loc):
     self.loc = loc
     self.status = "idle" #robot starts idle
+    self.target = None #Default no target
     self.bin = None #Robot Starts with No Bin
 
   def takeAction(self, action):
@@ -117,17 +136,17 @@ class workerGroup(object):
   def pickFruit(self, orchardBin):
     if self.loc == orchardBin.loc:
       orchardBin.capacity += .1 * random.random() #randomly fill up to 10% of a bin
-      orchardBin.capacity = min(100.0, orchardBin.capacity)
+      orchardBin.capacity = min(1.0, orchardBin.capacity)
 
     
     
     
     
 if __name__ == '__main__':
-  num_rows = 5
-  row_size = 5
+  num_rows = 10
+  row_size = 10
   num_bots = 1
   num_bins = 0
-  num_workers = 0
+  num_wkrs = 0
   sim = simulator(num_rows, row_size, num_bots, num_bins, num_workers)
   sim.drawSimulator()
