@@ -15,7 +15,7 @@ class simulator(object):
 
     self.orchard_map = None
 
-    self.wkrs = []
+    self.wkrs = {}
     self.bots = {}
     self.bins = {}
 
@@ -27,7 +27,7 @@ class simulator(object):
 
 
     for ii in range(num_wkrs):
-      worker_loc = [random.randint(0, num_rows-1), random.randint(0*row_size)]
+      worker_loc = [random.randint(0, num_rows-1), 1+random.randint(0*row_size)]
       self.wkrs.append(workerGroup(worker_loc))
 
     for ii in range(num_bots):
@@ -59,6 +59,10 @@ class simulator(object):
     for bot in self.bots:
       drawBindog(ax1, self.bots[bot])
 
+    for worker in self.wkrs:
+      loc = self.wkrs[worker].loc
+      ax1.add_patch(patches.Rectangle((loc[0]-.45, loc[1]-.45), .9, .9, facecolor="#c0ffee"))
+
     plt.show()
 
 
@@ -81,6 +85,16 @@ def drawBindog(ax1, bot):
   ax1.add_patch(patches.Circle((loc[0]+.25, loc[1]-.25), .1, color='k'))
   if bot.bin is not None:
     ax1.add_patch(patches.Rectangle((loc[0]-.2, loc[1]-.2), .4, .4, facecolor="k"))
+
+
+
+
+class cell(object):
+  """docstring for cell"""
+  def __init__(self, arg):
+    super(cell, self).__init__()
+    self.arg = arg
+    
 
 
 
