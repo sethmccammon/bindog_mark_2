@@ -19,3 +19,4 @@ def manhattanDist(p1, p2):
     res += abs(pair[1] - pair[0])
 
   return res
+
