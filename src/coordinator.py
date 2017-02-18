@@ -28,29 +28,43 @@ class coordinator():
 		# Greedily choose closest robot to each task needed to be completed
 
 		task_allocation = []
-		goals = []
 
 		# Get idle bots, bins needing pickup, locations needing bin delivery
 		idle_bots = simulator.getIdleBots()
-		goals += simulator.getBinPickupRequests() 
-		goals += simulator.getBinDeliveryRequests()
+		pickups = simulator.getBinPickupRequests() 
+		delivery = simulator.getBinDeliveryRequests()
 
-		print goals
-
-		# Loop through all goal locations and assign then
-		for loc in goals:
+		# Loop through all pickup locations and assign then
+		for loc in pickups:
 			
 			if idle_bots != []:
 				c_bot = self.findClosestBot(loc, idle_bots, simulator)
 				print simulator.bots[c_bot].loc
 				print loc
 				if simulator.bots[c_bot].hasBin():
-					task_allocation.append([c_bot, [loc]])
+					task_allocation.append([c_bot, [loc], ['get']])
 				else:
 					# Getting a bin then moving to goal location
 					r_loc = simulator.bots[c_bot].loc
 					r_loc = [r_loc[0],0]
-					task_allocation.append([c_bot, [r_loc,loc]])
+					task_allocation.append([c_bot, [r_loc,loc],['get', 'get']])
+
+				idle_bots.remove(c_bot)
+
+		# Loop through all delivery locations and assign then
+		for loc in pickups:
+			
+			if idle_bots != []:
+				c_bot = self.findClosestBot(loc, idle_bots, simulator)
+				print simulator.bots[c_bot].loc
+				print loc
+				if simulator.bots[c_bot].hasBin():
+					task_allocation.append([c_bot, [loc], ['drop']])
+				else:
+					# Getting a bin then moving to goal location
+					r_loc = simulator.bots[c_bot].loc
+					r_loc = [r_loc[0],0]
+					task_allocation.append([c_bot, [r_loc,loc],['get', 'drop']])
 
 				idle_bots.remove(c_bot)
 
@@ -60,6 +74,17 @@ class coordinator():
 	def auctionCord(self, simulator):
 		
 		idle_bots = simulator.getIdleBots()
+
+		#Get idle bots, bins needing pickup, locations needing bin delivery
+		idle_bots = simulator.getIdleBots()
+		goals += simulator.getBinPickupRequests() 
+		goals += simulator.getBinDeliveryRequests() 
+
+		# While still robots without plans
+		# All robots without plan calculate preferred plan
+		# Check conflict - if it exists, then auction
+		# Loop with robots that don't have a plan
+
 		return None
 
 
