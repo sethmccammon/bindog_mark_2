@@ -13,17 +13,18 @@ class coordinator():
 	def cordStep(self, simulator):
 		# Command loop
 
-		if cord_method == 0:
+		if self.cord_method == 0:
 			# Use the greedy method of coordination
-			return greedyCord(simulator)
-		elif cord_method == 1:
+			return self.greedyCord(simulator)
+		elif self.cord_method == 1:
 			# Use Yawei's method of coordination
-			return auctionCord(simulator)
+			return self.auctionCord(simulator)
 		else:
 			pass
 
 	def greedyCord(self, simulator):
 		
+		print "Starting Greedy Coordination"
 		# Greedily choose closest robot to each task needed to be completed
 
 		task_allocation = []
@@ -34,8 +35,10 @@ class coordinator():
 		goals += simulator.getBinPickupRequests() 
 		goals += simulator.getBinDeliveryRequests()
 
+		print goals
+
 		# Loop through all goal locations and assign then
-		for goals in bin_pickup:
+		for loc in goals:
 			
 			if idle_bots != []:
 				c_bot = findClosestBot(loc, idle_bots, simulator)
@@ -70,5 +73,15 @@ class coordinator():
 
 if __name__ == '__main__':
 
-	c = coordinator()
-	s = simulator()
+	num_rows = 10
+  	row_size = 10
+  	num_bots = 5
+  	num_bins = 0
+  	num_wkrs = 15
+  	sim = simulator(num_rows, row_size, num_bots, num_bins, num_wkrs)
+
+	cord = coordinator()
+
+	print cord.cordStep(sim)
+
+	sim.drawSimulator()

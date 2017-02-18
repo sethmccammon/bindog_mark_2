@@ -110,7 +110,7 @@ class simulator(object):
 
     for worker in self.wkrs:
       if self.wkrs[worker].pickup:
-        res.append(self.wkrs[worker.loc])
+        res.append(self.wkrs[worker].loc)
 
     return res
 
@@ -207,7 +207,7 @@ class workerGroup(object):
   """docstring for workerGroup"""
   def __init__(self, loc):
     self.loc = loc
-    self.pickup = False
+    self.pickup = True
     self.delivery = False
 
   def pickFruit(self, orchardBin):
