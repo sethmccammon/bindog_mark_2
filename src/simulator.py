@@ -136,7 +136,6 @@ class simulator(object):
 
     return idle_bots
 
-
   def getBinPickupRequests(self):
     res = []
 
@@ -234,6 +233,11 @@ class orchardBin(object):
   def __init__(self, loc, capacity = 1.0):
     self.loc = loc
     self.capacity = capacity #Default bin is empty, bin is full if capacity = 0
+    self.bot_assigned = False
+
+  def estimateTimeToFull(self):
+    picking_rate = .15
+    return self.capacity / picking_rate
 
 
 
