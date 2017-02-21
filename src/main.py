@@ -1,6 +1,42 @@
+import matplotlib.pyplot as plt
+
+from simulator import simulator
+from coordinator import coordinator
+from planner import planner
 
 def main():
-	return 0
+  num_rows = 5
+  row_len = 5
+  num_bins = 30
+  num_workers = 1
+  num_bots = 1
+
+  coord_method = 0
+
+  num_timestep = 10
+
+
+  sim = simulator(num_rows, row_len, num_bots, num_bins, num_workers)
+  coord = coordinator(coord_method)
+  plnr = planner(sim)
+  sim.drawSimulator()
+
+  for timestep in range(num_timestep):
+    plan = coord.cordStep(sim)
+
+    print "Coordinator Plan", plan
+
+    plan = plnr.getPlan(plan, sim)
+    # print "Planner Plan", plan
+    sim.drawSimulator()
+
+
+    for key in sim.bots.keys():
+      print key, sim.bots[key].plan
+    raw_input()
+    sim.step()
+  plt.show()
+  return 0
 
 if __name__ == '__main__':
 	main()

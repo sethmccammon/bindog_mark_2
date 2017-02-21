@@ -20,3 +20,8 @@ def manhattanDist(p1, p2):
 
   return res
 
+def safeMax(l):
+  if len(l) == 0:
+    return 0
+  else:
+    return max(l)

@@ -4,6 +4,8 @@ import matplotlib.patches as patches
 
 import random, copy, operator
 
+from utils import safeMax
+
 
 class simulator(object):
   """docstring for simulator"""
@@ -96,6 +98,13 @@ class simulator(object):
       current_bin.capacity -= total_apples_picked
 
 
+
+  def createBin(self, loc):
+    bin_id = safeMax(self.bins.keys())+1
+    self.bins[bin_id] = orchardBin(loc)
+    self.orchard_map[loc[0]][loc[1]].bins.append(bin_id)
+    return bin_id
+
   def step(self):
     for bot in self.bots:
       bot = self.bots[bot]
@@ -111,7 +120,7 @@ class simulator(object):
   def drawSimulator(self):
     scale = 10
     #img_size = [(self.num_rows*2+1)*scale, self.row_size+2*scale]
-    fig1 = plt.figure()
+    fig1 = plt.figure(1)
     ax1 = plt.gca()
 
     plt.xlim((-.5, (self.num_rows*3-.5)))
@@ -139,10 +148,7 @@ class simulator(object):
     for bin in self.bins:
       drawBin(ax1, self.bins[bin])
 
-    plt.show()
-
-
-
+    plt.show(block=False)
 
 
   def getIdleBots(self):
@@ -214,50 +220,77 @@ class bindog(object):
     self.status = "idle" #robot starts idle
     self.target = None #Default no target
     self.bin = None #Robot Starts with No Bin
+    self.plan = []
+
 
   def takeAction(self, action, sim):
-    if action == "N":
+    x, y, = self.loc
+    if action == "NORTH":
       proceed = True
-      print sim.orchard_map[self.loc[0]]
-      for map_cell in sim.orchard_map[self.loc[0]]:
+      print sim.orchard_map[x]
+      for map_cell in sim.orchard_map[x]:
         if map_cell.terrain == "path" and len(map_cell.bots) > 0:
           proceed = False
       if proceed:
         self.moveBot([0, 1], sim)
-        bot.plan = bot.plan[1:]
+        self.plan = self.plan[1:]
       #go North
       return 0
-    elif action == "S":
+    elif action == "SOUTH":
       self.moveBot([0, -1], sim)
-      bot.plan = bot.plan[1:]
+      self.plan = self.plan[1:]
       #go South
       return 0
-    elif action == "E":
+    elif action == "EAST":
       self.moveBot([1, 0], sim)
-      bot.plan = bot.plan[1:]
+      self.plan = self.plan[1:]
       #go East
       return 0
-    elif action == "W":
+    elif action == "WEST":
       self.moveBot([-1, 0], sim)
-      bot.plan = bot.plan[1:]
+      self.plan = self.plan[1:]
       #go West
       return 0
-    elif action == "P":
-      self.placeBin()
+    elif action == "PLACE":
+      self.placeBin(sim)
+      self.plan = self.plan[1:]
       return 0
-    elif action == "G":
-      self.getBin(sim.orchard_map)
+    elif action == "GET":
+      self.getBin(sim)
+      self.plan = self.plan[1:]
+      return 0
+    elif action == "SWAP":
+      self.swapBin(orchard_map)
+      self.plan = self.plan[1:]
+      # self.getBin(sim.orchard_map)
       return 0
     else:
       return 0
 
-  def getBin(self, orchard_map):
-    if len(orchard_map[self.loc[0]][self.loc[1]].bins) > 0:
-      self.bin = orchard_map[self.loc[0]][self.loc[1]].bins[0]
 
+  def swapBin(self, orchard_map):
+    x, y = self.loc
+    if len(orchard_map[x][y].bins) == 0:
+      self.placeBin()
+    else:
+      bin_id = self.bin
+      self.placeBin()
+      new_bins = [item for item in orchard_map[self.loc[0]][self.loc[1]].bins if item is not bin_id]
+      self.bin = new_bins[0] 
 
-  def placeBin(self):
+  def getBin(self, sim):
     if self.bin is not None:
+      print "Cannot Get bin, already got one, thanks!"
+    elif len(sim.orchard_map[self.loc[0]][self.loc[1]].bins) > 0:
+      self.bin = sim.orchard_map[self.loc[0]][self.loc[1]].bins[0]
+    elif sim.orchard_map[self.loc[0]][self.loc[1]].terrain == 'depot':
+      self.bin = sim.createBin(self.loc)
+      sim.bins[self.bin].bot_assigned = True
+
+
+  def placeBin(self, sim):
+    if self.bin is not None:
+      sim.bins[self.bin].bot_assigned = False
       self.bin = None
 
   def moveBot(self, action, sim):
