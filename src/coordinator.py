@@ -111,16 +111,18 @@ class coordinator():
 			plans = self.findNonConflictPlan(plans)
 
 			for plan in plans:
-				c_bot = plan[0]
-				loc = simulator.bins[plan[1]].loc
-				idle_bots.remove(c_bot)
-				if simulator.bots[c_bot].hasBin():
-					task_allocation.append([c_bot, [loc], ['drop']])
-				else:
-					# Getting a bin then moving to goal location
-					r_loc = simulator.bots[c_bot].loc
-					r_loc = [r_loc[0],0]
-					task_allocation.append([c_bot, [r_loc,loc],['get', 'drop']])
+				if plan != []:
+					c_bot = plan[0]
+					loc = simulator.bins[plan[1]].loc
+					simulator.bins[plan[1]].bot_assigned = True
+					idle_bots.remove(c_bot)
+					if simulator.bots[c_bot].hasBin():
+						task_allocation.append([c_bot, [loc], ['drop']])
+					else:
+						# Getting a bin then moving to goal location
+						r_loc = simulator.bots[c_bot].loc
+						r_loc = [r_loc[0],0]
+						task_allocation.append([c_bot, [r_loc,loc],['get', 'drop']])
 
 
 			still_planning = not(idle_bots == [] or prev_idle == idle_bots)
