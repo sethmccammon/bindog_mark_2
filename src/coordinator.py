@@ -2,7 +2,7 @@
 
 from utils import manhattanDist
 from simulator import simulator
-from copy import deepcopy
+import copy
 
 import random
 
@@ -47,9 +47,7 @@ class coordinator():
 					r_loc = simulator.bots[bot].loc
 					r_loc = [r_loc[0],0]
 					task_allocation.append([bot, [r_loc,loc],['get', 'get']])
-				print "assigning bot ", bot
 				assigned_bots.append(bot)
-				print assigned_bots
 
 		for bot in assigned_bots:
 			idle_bots.remove(bot)
@@ -59,8 +57,6 @@ class coordinator():
 		for loc in deliverys:
 			if idle_bots != []:
 				c_bot = self.findClosestBot(loc, idle_bots, simulator)
-				print simulator.bots[c_bot].loc
-				print loc
 				if simulator.bots[c_bot].hasBin():
 					task_allocation.append([c_bot, [loc], ['drop']])
 				else:
@@ -68,9 +64,7 @@ class coordinator():
 					r_loc = simulator.bots[c_bot].loc
 					r_loc = [r_loc[0],0]
 					task_allocation.append([c_bot, [r_loc,loc],['get', 'drop']])
-				print "removing bot ", c_bot
 				idle_bots.remove(c_bot)
-				print idle_bots
 
 		return task_allocation
 
@@ -85,7 +79,6 @@ class coordinator():
 					best_bin = bin
 					best_score = self.binScore(bot, bin, simulator)
 
-		print best_bin
 		return best_bin
 
 
@@ -99,6 +92,8 @@ class coordinator():
 
 
 	def auctionCord(self, simulator):
+		task_allocation = []
+
 		#Get idle bots, bins needing pickup, locations needing bin delivery
 		idle_bots = simulator.getIdleBots() 
 		deliverys = simulator.getBinDeliveryRequests() 
@@ -111,21 +106,14 @@ class coordinator():
 			
 			plans = []
 			for bot in idle_bots:
-				plans.append(getRobotPlan(bot, simulator))
+				plans.append(self.getRobotPlan(bot, simulator))
 
-			plans = findNonConflictPlan(plans)
+			plans = self.findNonConflictPlan(plans)
 
 			for plan in plans:
-				idle_bots.remove(plan[0])
-
-			still_planning = not(idle_bots == [] or prev_idle == idle_bots)
-			prev_idle = copy.deepcopy(idle_bots)
-
-		for loc in delivery:
-			if idle_bots != []:
-				c_bot = self.findClosestBot(loc, idle_bots, simulator)
-				print simulator.bots[c_bot].loc
-				print loc
+				c_bot = plan[0]
+				loc = simulator.bins[plan[1]].loc
+				idle_bots.remove(c_bot)
 				if simulator.bots[c_bot].hasBin():
 					task_allocation.append([c_bot, [loc], ['drop']])
 				else:
@@ -133,31 +121,54 @@ class coordinator():
 					r_loc = simulator.bots[c_bot].loc
 					r_loc = [r_loc[0],0]
 					task_allocation.append([c_bot, [r_loc,loc],['get', 'drop']])
-				print "removing bot ", c_bot
+
+
+			still_planning = not(idle_bots == [] or prev_idle == idle_bots)
+			prev_idle = copy.deepcopy(idle_bots)
+
+		for loc in deliverys:
+			if idle_bots != []:
+				c_bot = self.findClosestBot(loc, idle_bots, simulator)
+				if simulator.bots[c_bot].hasBin():
+					task_allocation.append([c_bot, [loc], ['drop']])
+				else:
+					# Getting a bin then moving to goal location
+					r_loc = simulator.bots[c_bot].loc
+					r_loc = [r_loc[0],0]
+					task_allocation.append([c_bot, [r_loc,loc],['get', 'drop']])
+
 				idle_bots.remove(c_bot)
-				print idle_bots
 
 
-		return None
+
+		return task_allocation
 
 
 	def getRobotPlan(self, bot, simulator):
 		# score each plan by travel and wait time
 
-		best_bin = findBestBin(bot, [], simulator)
+		best_bin = self.findBestBin(bot, [], simulator)
 		if best_bin is not None:
-			return [bot, best_bin, binScore(bot, best_bin, simulator)]
+			return [bot, best_bin, self.binScore(bot, best_bin, simulator)]
 		else:
 			return []
 
 	def findNonConflictPlan(self, plans):
 		
+		to_remove = []
+
 		for i, plan in enumerate(plans):
 			for j in range(i+1,len(plans)):
-				if plan[1] == plans[j][1] and plan[2] <= plans[j][2]:
-					plans.remove(plans[j])
-				else:
-					plans.remove(plan)
+				if plan[1] == plans[j][1]: 
+					if plan[2] <= plans[j][2]:
+						to_remove.append(plans[j])
+					else:
+						to_remove.append(plan)
+		
+		for item in to_remove:
+			if item in plans:
+				plans.remove(item)
+
 		return plans
 
 
@@ -187,9 +198,13 @@ if __name__ == '__main__':
 
   	sim.wkrs[0].delivery = True
 
-	cord = coordinator()
+	cord = coordinator(cord_method=1)
 
-	print cord.cordStep(sim)
+	plans = cord.cordStep(sim)
+
+	print "displaying the plans for the robots"
+	for plan in plans:
+		print plan
 
 	sim.drawSimulator()
 
