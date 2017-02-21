@@ -43,6 +43,15 @@ class planner():
           try:
             #add pick-up or dro-off action if it exists at the end of the sequence
             plan_string.append(target[2])
+            #if the last command is pick-up, bring the robot back to the repository
+            if(target[2]=='G'):
+              # print target
+              # print plan_string
+              # raw_input()
+              #append W as many times as its needs to get back to the repo
+              for i in range(target[1]):
+                plan_string.append('W')
+
           except:
             #do nothing
             random_variable=0
