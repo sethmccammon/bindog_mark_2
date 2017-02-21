@@ -141,7 +141,7 @@ class simulator(object):
 
     for worker in self.wkrs:
       if self.wkrs[worker].pickup:
-        res.append(self.wkrs[worker.loc])
+        res.append(self.wkrs[worker].loc)
 
     return res
 
@@ -186,9 +186,6 @@ class cell(object):
       self.bots = None
       self.wkrs = None
       self.apples = .9 + .2*random.random()
-    
-
-
 
 
 class bindog(object):

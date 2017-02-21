@@ -23,6 +23,22 @@ class coordinator():
 			pass
 
 	def greedyCord(self, simulator):
+		print "Starting Greedy Coordination"
+
+		task_allocation = []
+
+		idle_bots = simulator.getIdleBots()
+
+		idle_bots.shuffle()
+
+		for bot in idle_bots:
+			goal = self.findBestBin(bot, [], simulator)
+
+			if goal is not None:
+				loc = simulator.bin[goal].loc
+				simulator.bins[goal].bot_assigned = True
+
+	def greedyCord(self, simulator):
 		
 		print "Starting Greedy Coordination"
 		# Greedily choose closest robot to each task needed to be completed
@@ -31,10 +47,10 @@ class coordinator():
 
 		# Get idle bots, bins needing pickup, locations needing bin delivery
 		idle_bots = simulator.getIdleBots()
-		
+		print idle_bots
 		#bins = simulator.bins # We consider all bins
 		pickups = simulator.getBinPickupRequests() 
-		delivery = simulator.getBinDeliveryRequests()
+		deliverys = simulator.getBinDeliveryRequests()
 
 		# Loop through all pickup locations and assign then
 		for loc in pickups:
@@ -50,13 +66,15 @@ class coordinator():
 					r_loc = simulator.bots[c_bot].loc
 					r_loc = [r_loc[0],0]
 					task_allocation.append([c_bot, [r_loc,loc],['get', 'get']])
-
+				print "removing bot ", c_bot
 				idle_bots.remove(c_bot)
+				print idle_bots
 
-		# Loop through all non-full bins
+		# Loop through all idle bots and find bins to go to
+		random.shuffle(idle_bots)
 		for bot in idle_bots:
-			goal = findBestBin(bot, pickups, simulator)
-
+			goal = self.findBestBin(bot, pickups, simulator)
+			print goal
 			if goal is not None:
 				loc = simulator.bins[goal].loc
 				simulator.bins[goal].bot_assigned = True
@@ -67,9 +85,12 @@ class coordinator():
 					r_loc = simulator.bots[c_bot].loc
 					r_loc = [r_loc[0],0]
 					task_allocation.append([c_bot, [r_loc,loc],['get', 'get']])
+				print "removing bot ", bot
+				idle_bots.remove(bot)
+				print idle_bots
 
 		# Loop through all delivery locations and assign then
-		for loc in delivery:
+		for loc in deliverys:
 			
 			if idle_bots != []:
 				c_bot = self.findClosestBot(loc, idle_bots, simulator)
@@ -82,8 +103,9 @@ class coordinator():
 					r_loc = simulator.bots[c_bot].loc
 					r_loc = [r_loc[0],0]
 					task_allocation.append([c_bot, [r_loc,loc],['get', 'drop']])
-
+				print "removing bot ", c_bot
 				idle_bots.remove(c_bot)
+				print idle_bots
 
 
 		return task_allocation
@@ -95,9 +117,9 @@ class coordinator():
 
 		for bin in bins:
 			if not(bins[bin].loc in exclude_bins) and not(bins[bin].bot_assigned):
-				if binScore(bot, bin, simulator) < best_score:
+				if self.binScore(bot, bin, simulator) < best_score:
 					best_bin = bin
-					best_score = binScore(bot, bin, simulator)
+					best_score = self.binScore(bot, bin, simulator)
 
 		return best_bin
 
@@ -112,19 +134,15 @@ class coordinator():
 
 
 	def auctionCord(self, simulator):
-		
-		idle_bots = simulator.getIdleBots()
-
 		#Get idle bots, bins needing pickup, locations needing bin delivery
-		idle_bots = simulator.getIdleBots()
-		goals += simulator.getBinPickupRequests() 
-		goals += simulator.getBinDeliveryRequests() 
+		idle_bots = simulator.getIdleBots() 
+		deliverys += simulator.getBinDeliveryRequests() 
 
 		# While still robots without plans
 		while idle_bots != []:
 			plans = []
 			for bot in idle_bots:
-				plans.append(getRobotPlan(bot, goals, simulator))
+				plans.append(getRobotPlan(bot, simulator))
 
 			plans = findNonConflictPlan(plans)
 
@@ -170,6 +188,8 @@ if __name__ == '__main__':
   	num_bins = 0
   	num_wkrs = 15
   	sim = simulator(num_rows, row_size, num_bots, num_bins, num_wkrs)
+
+  	sim.wkrs[0].pickup = True
 
 	cord = coordinator()
 
