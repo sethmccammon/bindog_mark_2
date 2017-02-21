@@ -2,6 +2,7 @@
 
 from utils import manhattanDist
 from simulator import simulator
+from copy import deepcopy
 
 import random
 
@@ -71,12 +72,128 @@ class coordinator():
 				idle_bots.remove(c_bot)
 				print idle_bots
 
-
-		# Still need to handle bin placement requests
-
 		return task_allocation
 
-	# def greedyCord(self, simulator):
+	def findBestBin(self, bot, exclude_bins, simulator):
+		bins = simulator.bins # get the dictionary of bins
+		best_bin = None
+		best_score = float('inf')
+
+		for bin in bins:
+			if not(bins[bin].loc in exclude_bins) and not(bins[bin].bot_assigned):
+				if self.binScore(bot, bin, simulator) < best_score:
+					best_bin = bin
+					best_score = self.binScore(bot, bin, simulator)
+
+		print best_bin
+		return best_bin
+
+
+
+	def binScore(self, bot, bin, simulator):
+		score = manhattanDist(simulator.bins[bin].loc, simulator.bots[bot].loc)
+
+		score += simulator.bins[bin].estimateTimeToFull()
+
+		return score
+
+
+	def auctionCord(self, simulator):
+		#Get idle bots, bins needing pickup, locations needing bin delivery
+		idle_bots = simulator.getIdleBots() 
+		deliverys = simulator.getBinDeliveryRequests() 
+
+		# While still robots without plans
+		still_planning = True
+		prev_idle = copy.deepcopy(idle_bots)
+
+		while still_planning:
+			
+			plans = []
+			for bot in idle_bots:
+				plans.append(getRobotPlan(bot, simulator))
+
+			plans = findNonConflictPlan(plans)
+
+			for plan in plans:
+				idle_bots.remove(plan[0])
+
+			still_planning = not(idle_bots == [] or prev_idle == idle_bots)
+			prev_idle = copy.deepcopy(idle_bots)
+
+		for loc in delivery:
+			if idle_bots != []:
+				c_bot = self.findClosestBot(loc, idle_bots, simulator)
+				print simulator.bots[c_bot].loc
+				print loc
+				if simulator.bots[c_bot].hasBin():
+					task_allocation.append([c_bot, [loc], ['drop']])
+				else:
+					# Getting a bin then moving to goal location
+					r_loc = simulator.bots[c_bot].loc
+					r_loc = [r_loc[0],0]
+					task_allocation.append([c_bot, [r_loc,loc],['get', 'drop']])
+				print "removing bot ", c_bot
+				idle_bots.remove(c_bot)
+				print idle_bots
+
+
+		return None
+
+
+	def getRobotPlan(self, bot, simulator):
+		# score each plan by travel and wait time
+
+		best_bin = findBestBin(bot, [], simulator)
+		if best_bin is not None:
+			return [bot, best_bin, binScore(bot, best_bin, simulator)]
+		else:
+			return []
+
+	def findNonConflictPlan(self, plans):
+		
+		for i, plan in enumerate(plans):
+			for j in range(i+1,len(plans)):
+				if plan[1] == plans[j][1] and plan[2] <= plans[j][2]:
+					plans.remove(plans[j])
+				else:
+					plans.remove(plan)
+		return plans
+
+
+	def findClosestBot(self, loc, bots, simulator):
+		# Probably need to write different distance function - not manhattan but up and down + sideways
+		dist = float('inf')
+		c_bot = None
+
+		for item in bots:
+
+			d = manhattanDist(loc, simulator.bots[item].loc)
+
+			if d < dist:
+				dist = d
+				c_bot = item
+
+		return c_bot
+
+if __name__ == '__main__':
+
+	num_rows = 10
+  	row_size = 10
+  	num_bots = 5
+  	num_bins = 0
+  	num_wkrs = 4
+  	sim = simulator(num_rows, row_size, num_bots, num_bins, num_wkrs)
+
+  	sim.wkrs[0].delivery = True
+
+	cord = coordinator()
+
+	print cord.cordStep(sim)
+
+	sim.drawSimulator()
+
+		# def greedyCord(self, simulator):
 		
 	# 	print "Starting Greedy Coordination"
 	# 	# Greedily choose closest robot to each task needed to be completed
@@ -147,91 +264,3 @@ class coordinator():
 
 
 	# 	return task_allocation
-
-	def findBestBin(self, bot, exclude_bins, simulator):
-		bins = simulator.bins # get the dictionary of bins
-		best_bin = None
-		best_score = float('inf')
-
-		for bin in bins:
-			if not(bins[bin].loc in exclude_bins) and not(bins[bin].bot_assigned):
-				if self.binScore(bot, bin, simulator) < best_score:
-					best_bin = bin
-					best_score = self.binScore(bot, bin, simulator)
-
-		print best_bin
-		return best_bin
-
-
-
-	def binScore(self, bot, bin, simulator):
-		score = manhattanDist(simulator.bins[bin].loc, simulator.bots[bot].loc)
-
-		score += simulator.bins[bin].estimateTimeToFull()
-
-		return score
-
-
-	def auctionCord(self, simulator):
-		#Get idle bots, bins needing pickup, locations needing bin delivery
-		idle_bots = simulator.getIdleBots() 
-		deliverys += simulator.getBinDeliveryRequests() 
-
-		# While still robots without plans
-		while idle_bots != []:
-			plans = []
-			for bot in idle_bots:
-				plans.append(getRobotPlan(bot, simulator))
-
-			plans = findNonConflictPlan(plans)
-
-			for plan in plans:
-				idle_bots.remove(plan[0])
-
-		# All robots without plan calculate preferred plan
-		# Check conflict - if it exists, then auction
-		# Loop with robots that don't have a plan
-
-		return None
-
-
-	def getRobotPlan(self, bot, goals, simulator):
-		# score each plan by travel and wait time
-
-		return []
-
-	def findNonConflictPlan(self, plans):
-		return []
-
-
-	def findClosestBot(self, loc, bots, simulator):
-		# Probably need to write different distance function - not manhattan but up and down + sideways
-		dist = float('inf')
-		c_bot = None
-
-		for item in bots:
-
-			d = manhattanDist(loc, simulator.bots[item].loc)
-
-			if d < dist:
-				dist = d
-				c_bot = item
-
-		return c_bot
-
-if __name__ == '__main__':
-
-	num_rows = 10
-  	row_size = 10
-  	num_bots = 5
-  	num_bins = 0
-  	num_wkrs = 4
-  	sim = simulator(num_rows, row_size, num_bots, num_bins, num_wkrs)
-
-  	sim.wkrs[0].delivery = True
-
-	cord = coordinator()
-
-	print cord.cordStep(sim)
-
-	sim.drawSimulator()
