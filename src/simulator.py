@@ -151,7 +151,7 @@ class simulator(object):
 
     for worker in self.wkrs:
       if self.wkrs[worker].delivery:
-        res.append(self.wkrs[worker.loc])
+        res.append(self.wkrs[worker].loc)
         
     return res
 
