@@ -2,7 +2,7 @@
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
-import random, copy
+import random, copy, operator
 
 
 class simulator(object):
@@ -65,34 +65,48 @@ class simulator(object):
       self.bins[bin_id] = orchardBin(bin_loc)
       self.orchard_map[bin_loc[0]][bin_loc[1]].bins.append(bin_id)
 
-  # def pickFruit(self, worker):
-  #   x, y = worker.loc
-  #   current_cell = self.orchard_map[x][y]
 
-  #   print "Loc", x, y
-  #   print "Bin Present?", len(current_cell.bins) > 0
+  def pickFruit(self, worker):
+    worker = self.wkrs[worker]
+    x, y = worker.loc
+    current_cell = self.orchard_map[x][y]
 
-  #   if len(current_cell.bins) > 0:
-  #     max_picked = min((.1 + .1 * random.random())*self.efficiency, current_cell.bins[0].capacity)
+    if len(current_cell.bins) > 0:
+      current_bin = self.bins[current_cell.bins[0]]
+      max_picked = min((.1 + .1 * random.random())*worker.efficiency, current_bin.capacity)
+      #max_picked = min(.2, self.bins[current_cell.bins[0]].capacity)
 
-  #     print max_picked
-
-  #     total_apples_picked = 0
-  #     for side in [1, -1]:
-  #       apples_picked_side = 0
-  #       max_picked_side = max_picked/2
+      total_apples_picked = 0
+      for side in [1, -1]:
+        apples_picked_side = 0
+        max_picked_side = max_picked/2
       
-  #       orchard_apples_picked = min(orchard_map[x+side][y].apples, max_picked_side)
-  #       apples_picked_side += orchard_apples_picked
-  #       orchard_map[x+side][y].apples -= orchard_apples_picked
-  #       if apples_picked_side < max_picked_side:
-  #         side_remaining = max_picked_side - apples_picked_side
-  #         for offset in [-1, 1]:
-  #           orchard_apples_picked = min(orchard_map[x+side][y+offset].apples, side_remaining/2)
-  #           apples_picked_side += orchard_apples_picked
-  #           orchard_map[x+side][y+offset].apples -= orchard_apples_picked
-  #       total_apples_picked += apples_picked_side
-  #     return total_apples_picked
+        orchard_apples_picked = min(self.orchard_map[x+side][y].apples, max_picked_side)
+        apples_picked_side += orchard_apples_picked
+        self.orchard_map[x+side][y].apples -= orchard_apples_picked
+
+        if apples_picked_side < max_picked_side:
+          side_remaining = max_picked_side - apples_picked_side
+          for offset in [-1, 1]:
+            if self.orchard_map[x+side][y+offset].terrain == "orchard":
+              orchard_apples_picked = min(self.orchard_map[x+side][y+offset].apples, side_remaining/2)
+              apples_picked_side += orchard_apples_picked
+              self.orchard_map[x+side][y+offset].apples -= orchard_apples_picked
+        total_apples_picked += apples_picked_side
+      current_bin.capacity -= total_apples_picked
+
+
+  def step(self):
+    for bot in self.bots:
+      bot = self.bots[bot]
+      bot.takeAction(bot.plan[0], self)
+      
+
+
+    for worker in self.wkrs:
+      self.pickFruit(worker)
+
+
 
   def drawSimulator(self):
     scale = 10
@@ -107,6 +121,7 @@ class simulator(object):
       for col_id, item in enumerate(row):
         if item.terrain == "orchard":
           ax1.add_patch(patches.Rectangle((row_id-.5, col_id-.5), 1., 1., facecolor="#228b22"))
+          plt.text(row_id, col_id, str(item.apples)[:4])
         elif item.terrain == "headlands":
           ax1.add_patch(patches.Rectangle((row_id-.5, col_id-.5), 1., 1., facecolor="#776b46"))
         elif item.terrain == "depot":
@@ -115,6 +130,7 @@ class simulator(object):
 
     for bot in self.bots:
       drawBindog(ax1, self.bots[bot])
+      plt.text(self.bots[bot].loc[0]-.1, self.bots[bot].loc[1]-.05, bot)
 
     for worker in self.wkrs:
       loc = self.wkrs[worker].loc
@@ -124,6 +140,9 @@ class simulator(object):
       drawBin(ax1, self.bins[bin])
 
     plt.show()
+
+
+
 
 
   def getIdleBots(self):
@@ -196,29 +215,55 @@ class bindog(object):
     self.target = None #Default no target
     self.bin = None #Robot Starts with No Bin
 
-  def takeAction(self, action):
-    if action == "GOTO":
+  def takeAction(self, action, sim):
+    if action == "N":
+      proceed = True
+      print sim.orchard_map[self.loc[0]]
+      for map_cell in sim.orchard_map[self.loc[0]]:
+        if map_cell.terrain == "path" and len(map_cell.bots) > 0:
+          proceed = False
+      if proceed:
+        self.moveBot([0, 1], sim)
+        bot.plan = bot.plan[1:]
+      #go North
       return 0
-    elif action == "PICK_UP":
+    elif action == "S":
+      self.moveBot([0, -1], sim)
+      bot.plan = bot.plan[1:]
+      #go South
       return 0
-    elif action == "PUT_DOWN":
+    elif action == "E":
+      self.moveBot([1, 0], sim)
+      bot.plan = bot.plan[1:]
+      #go East
+      return 0
+    elif action == "W":
+      self.moveBot([-1, 0], sim)
+      bot.plan = bot.plan[1:]
+      #go West
+      return 0
+    elif action == "P":
+      self.placeBin()
+      return 0
+    elif action == "G":
+      self.getBin(sim.orchard_map)
       return 0
     else:
       return 0
 
-  def getBin(self, loc, orchardBin):
-    if self.loc == orchardBin.loc and self.bin is None:
-      self.bin = orchardBin
+  def getBin(self, orchard_map):
+    if len(orchard_map[self.loc[0]][self.loc[1]].bins) > 0:
+      self.bin = orchard_map[self.loc[0]][self.loc[1]].bins[0]
 
-  def dropBin(self):
+
+  def placeBin(self):
     if self.bin is not None:
       self.bin = None
 
-  def moveBot(self, new_loc):
-    action = [1, 0] #dummy action is to go north
-    self.loc = self.loc + action # need to define action
+  def moveBot(self, action, sim):
+    self.loc = map(operator.add, self.loc, action) # need to define action
     if self.bin is not None:
-      self.bin.loc = self.loc
+      sim.bins[self.bin].loc = self.loc
 
  
   def hasBin(self):
@@ -247,30 +292,12 @@ class workerGroup(object):
     self.delivery = False
 
 
-
-
-          
-
-
   def pickupRequest(self):
     self.pickup = True
 
   def deliveryRequest(self):
     self.delivery = True
   
-    
-# def gatherFruit(orchard_map, loc, budget, offset = 0):
-#   x, y = loc
-#   if offset == 0:
-#     #Pick apples from the immediate neighbors of the bin
-#     orchard_apples_picked = min(orchard_map[x][y].apples, budget)
-#     # apples_picked_side += orchard_apples_picked
-#     orchard_map[x][y].apples -= orchard_apples_picked
-
-#     remaining_budget = budget - orchard_apples_picked
-
-
-
 
     
 if __name__ == '__main__':
@@ -279,11 +306,18 @@ if __name__ == '__main__':
   # num_bots = 5
   # num_bins = 30
   # num_wkrs = 5
-  sim = simulator(10, 10, 1, 30, 1)
-  # for worker in sim.wkrs:
-  #   sim.pickFruit(worker)
-
-
-
-
+  sim = simulator(5, 5, 1, 30, 1)
+  bot = sim.bots[sim.bots.keys()[0]]
+  bot.plan = ["N", "S", "E", "W"]
+  sim.step()
+  print bot.loc
+  sim.drawSimulator()
+  sim.step()
+  print bot.loc
+  sim.drawSimulator()
+  sim.step()
+  print bot.loc
+  sim.drawSimulator()
+  sim.step()
+  print bot.loc
   sim.drawSimulator()
