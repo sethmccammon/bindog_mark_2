@@ -108,7 +108,10 @@ class simulator(object):
   def step(self):
     for bot in self.bots:
       bot = self.bots[bot]
-      bot.takeAction(bot.plan[0], self)
+      if bot.plan != []:
+        bot.takeAction(bot.plan[0], self)
+      else:
+        bot.status = 'idle'
       
 
 
@@ -265,6 +268,7 @@ class bindog(object):
       # self.getBin(sim.orchard_map)
       return 0
     else:
+      self.status = "idle"
       return 0
 
 
@@ -278,7 +282,8 @@ class bindog(object):
       self.placeBin(sim)
       print 'orchard spot: ',sim.orchard_map[self.loc[0]][self.loc[1]].bins
       new_bins = [item for item in sim.orchard_map[self.loc[0]][self.loc[1]].bins if item is not bin_id]
-      self.bin = new_bins[0] 
+      self.bin = new_bins[0]
+      sim.bins[self.bin].bot_assigned = True
 
   def getBin(self, sim):
     if self.bin is not None:
@@ -293,6 +298,7 @@ class bindog(object):
   def placeBin(self, sim):
     if self.bin is not None:
       sim.bins[self.bin].bot_assigned = False
+      sim.orchard_map[self.loc[0]][self.loc[1]].bins.append(self.bin)
       self.bin = None
 
   def moveBot(self, action, sim):

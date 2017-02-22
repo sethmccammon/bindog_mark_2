@@ -13,7 +13,7 @@ def main():
 
   coord_method = 0
 
-  num_timestep = 10
+  num_timestep = 30
 
 
   sim = simulator(num_rows, row_len, num_bots, num_bins, num_workers)

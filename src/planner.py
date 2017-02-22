@@ -96,6 +96,7 @@ class planner():
       #append the robots specific final path to the global final set of robIDs
       #and paths
       sim.bots[robID].plan = robot_plan
+      sim.bots[robID].status = 'busy'
       #set_of_robots_plan.append([robID,robot_plan])
     # print set_of_robots_plan
     return set_of_robots_plan
