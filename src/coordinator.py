@@ -63,13 +63,13 @@ class coordinator():
 
         if simulator.bots[bot].hasBin():
           #task_allocation.append([bot, [loc], ['get']])
-          task_allocation.append(robotTask(bot, [loc, end_loc], ['swap', 'drop']))
+          task_allocation.append(robotTask(bot, [loc, end_loc], ['swap', 'place']))
         else:
           # Getting a bin then moving to goal location
           r_loc = simulator.bots[bot].loc
           r_loc = [r_loc[0],0]
           #task_allocation.append([bot, [r_loc,loc],['get', 'get']])
-          task_allocation.append(robotTask(bot, [r_loc,loc,end_loc], ['get', 'swap', 'drop']))
+          task_allocation.append(robotTask(bot, [r_loc,loc,end_loc], ['get', 'swap', 'place']))
         assigned_bots.append(bot)
 
     for bot in assigned_bots:
@@ -81,12 +81,12 @@ class coordinator():
       if idle_bots != []:
         c_bot = self.findClosestBot(loc, idle_bots, simulator)
         if simulator.bots[c_bot].hasBin():
-          task_allocation.append([c_bot, [loc], ['drop']])
+          task_allocation.append([c_bot, [loc], ['place']])
         else:
           # Getting a bin then moving to goal location
           r_loc = simulator.bots[c_bot].loc
           r_loc = [r_loc[0],0]
-          task_allocation.append(robotTask(c_bot, [r_loc,loc],['get', 'drop']))
+          task_allocation.append(robotTask(c_bot, [r_loc,loc],['get', 'place']))
         idle_bots.remove(c_bot)
 
     return task_allocation
@@ -141,12 +141,12 @@ class coordinator():
           simulator.bins[plan[1]].bot_assigned = True
           idle_bots.remove(c_bot)
           if simulator.bots[c_bot].hasBin():
-            task_allocation.append(robotTask(c_bot, [loc, end_loc], ['swap','drop']))
+            task_allocation.append(robotTask(c_bot, [loc, end_loc], ['swap','place']))
           else:
             # Getting a bin then moving to goal location
             r_loc = simulator.bots[c_bot].loc
             r_loc = [r_loc[0],0]
-            task_allocation.append(robotTask(c_bot, [r_loc,loc,end_loc],['get', 'swap','drop']))
+            task_allocation.append(robotTask(c_bot, [r_loc,loc,end_loc],['get', 'swap','place']))
 
 
       still_planning = not(idle_bots == [] or prev_idle == idle_bots)
@@ -156,12 +156,12 @@ class coordinator():
       if idle_bots != []:
         c_bot = self.findClosestBot(loc, idle_bots, simulator)
         if simulator.bots[c_bot].hasBin():
-          task_allocation.append(robotTask(c_bot, [loc], ['drop']))
+          task_allocation.append(robotTask(c_bot, [loc], ['place']))
         else:
           # Getting a bin then moving to goal location
           r_loc = simulator.bots[c_bot].loc
           r_loc = [r_loc[0],0]
-          task_allocation.append(robotTask(c_bot, [r_loc,loc],['get', 'drop']))
+          task_allocation.append(robotTask(c_bot, [r_loc,loc],['get', 'place']))
 
         idle_bots.remove(c_bot)
 
@@ -293,12 +293,12 @@ if __name__ == '__main__':
   #       print simulator.bots[c_bot].loc
   #       print loc
   #       if simulator.bots[c_bot].hasBin():
-  #         task_allocation.append([c_bot, [loc], ['drop']])
+  #         task_allocation.append([c_bot, [loc], ['place']])
   #       else:
   #         # Getting a bin then moving to goal location
   #         r_loc = simulator.bots[c_bot].loc
   #         r_loc = [r_loc[0],0]
-  #         task_allocation.append([c_bot, [r_loc,loc],['get', 'drop']])
+  #         task_allocation.append([c_bot, [r_loc,loc],['get', 'place']])
   #       print "removing bot ", c_bot
   #       idle_bots.remove(c_bot)
   #       print idle_bots

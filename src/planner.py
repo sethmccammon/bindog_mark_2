@@ -71,12 +71,16 @@ class planner():
             #if the last command is pick-up, bring the robot back to the repository
           if(self.robotTasks[i][target_id]=='get'):
             plan_string.append("GET")
+          elif(self.robotTasks[i][target_id]=='place'):
+            plan_string.append("PLACE")
+          elif(self.robotTasks[i][target_id]=='swap'):
+            plan_string.append("SWAP")
             # print target
             # print plan_string
             # raw_input()
             #append W as many times as its needs to get back to the repo
-            for i in range(target[1]):
-              plan_string.append('SOUTH')
+            # for i in range(target[1]):
+            #   plan_string.append('SOUTH')
 
           # except:
           #   #do nothing
@@ -86,7 +90,7 @@ class planner():
           # print plan_coordinates
           # print plan_string
           #building this specific robot's path
-          robot_plan+=plan_string + ["PLACE"]
+          # robot_plan+=plan_string + ["PLACE"]
         else:
           print "Error occured with either target or start location of bot."
       #append the robots specific final path to the global final set of robIDs
