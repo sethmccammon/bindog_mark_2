@@ -90,7 +90,7 @@ class planner():
           # print plan_coordinates
           # print plan_string
           #building this specific robot's path
-          # robot_plan+=plan_string + ["PLACE"]
+          robot_plan+=plan_string
         else:
           print "Error occured with either target or start location of bot."
       #append the robots specific final path to the global final set of robIDs

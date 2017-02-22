@@ -260,7 +260,7 @@ class bindog(object):
       self.plan = self.plan[1:]
       return 0
     elif action == "SWAP":
-      self.swapBin(orchard_map)
+      self.swapBin(sim)
       self.plan = self.plan[1:]
       # self.getBin(sim.orchard_map)
       return 0
@@ -268,14 +268,16 @@ class bindog(object):
       return 0
 
 
-  def swapBin(self, orchard_map):
+  def swapBin(self, sim):
     x, y = self.loc
-    if len(orchard_map[x][y].bins) == 0:
-      self.placeBin()
+    if len(sim.orchard_map[x][y].bins) == 0:
+      self.placeBin(sim)
     else:
       bin_id = self.bin
-      self.placeBin()
-      new_bins = [item for item in orchard_map[self.loc[0]][self.loc[1]].bins if item is not bin_id]
+      print "bin_id: ", bin_id
+      self.placeBin(sim)
+      print 'orchard spot: ',sim.orchard_map[self.loc[0]][self.loc[1]].bins
+      new_bins = [item for item in sim.orchard_map[self.loc[0]][self.loc[1]].bins if item is not bin_id]
       self.bin = new_bins[0] 
 
   def getBin(self, sim):
