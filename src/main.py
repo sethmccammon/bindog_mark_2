@@ -8,12 +8,12 @@ def main():
   num_rows = 5
   row_len = 5
   num_bins = 30
-  num_workers = 1
-  num_bots = 1
+  num_workers = 4
+  num_bots = 2
 
-  coord_method = 0
+  coord_method = 1
 
-  num_timestep = 30
+  num_timestep = 10000
 
 
   sim = simulator(num_rows, row_len, num_bots, num_bins, num_workers)
@@ -24,7 +24,9 @@ def main():
   for timestep in range(num_timestep):
     plan = coord.cordStep(sim)
 
-    print "Coordinator Plan", plan
+    for item in plan:
+      print "Robot: ", item.robot_id
+      print "Goals: ", item.locations
 
     plan = plnr.getPlan(plan, sim)
     # print "Planner Plan", plan

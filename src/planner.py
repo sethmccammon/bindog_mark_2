@@ -34,12 +34,12 @@ class planner():
     #for every robot, make a plan with ASTAR
     set_of_robots_plan=[]
 
-    for robID , i in enumerate(self.robotIDs):
+    for i, robID in enumerate(self.robotIDs):
       current_pos=sim.bots[robID].loc
       plan_string=''
       robot_plan=[]
       #for every target location
-      for target_id, target in enumerate(self.robotTargets[i-1]):
+      for target_id, target in enumerate(self.robotTargets[i]):
         
         # print "current_pos: ",current_pos
         current_pos=current_pos[:2]

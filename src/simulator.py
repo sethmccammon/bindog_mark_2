@@ -50,7 +50,7 @@ class simulator(object):
       else:
         worker_id = len(self.wkrs)
         self.wkrs[worker_id] = workerGroup(worker_loc)
-        self.orchard_map[worker_loc[0]][worker_loc[1]].bins.append(worker_id) 
+        self.orchard_map[worker_loc[0]][worker_loc[1]].wkrs.append(worker_id) 
 
     while len(self.bots) < num_bots:
       bot_loc = [random.randint(0, num_rows*2+1), 0]
@@ -106,17 +106,27 @@ class simulator(object):
     return bin_id
 
   def step(self):
+
     for bot in self.bots:
       bot = self.bots[bot]
       if bot.plan != []:
         bot.takeAction(bot.plan[0], self)
       else:
         bot.status = 'idle'
-      
-
 
     for worker in self.wkrs:
       self.pickFruit(worker)
+
+    to_remove = []
+    for bin in self.bins:
+      if not(self.bins[bin].bot_assigned) and self.orchard_map[self.bins[bin].loc[0]][self.bins[bin].loc[1]].terrain == 'depot':
+        # Remove the bin
+        # Add functionality here to count apples picked / bins used
+        to_remove.append(bin)
+    
+    for bin in to_remove:
+      self.orchard_map[self.bins[bin].loc[0]][self.bins[bin].loc[1]].bins.remove(bin)
+      del self.bins[bin]
 
 
 
@@ -124,6 +134,7 @@ class simulator(object):
     scale = 10
     #img_size = [(self.num_rows*2+1)*scale, self.row_size+2*scale]
     fig1 = plt.figure(1)
+    plt.clf()
     ax1 = plt.gca()
 
     plt.xlim((-.5, (self.num_rows*3-.5)))
@@ -230,7 +241,7 @@ class bindog(object):
     x, y, = self.loc
     if action == "NORTH":
       proceed = True
-      print sim.orchard_map[x]
+
       for map_cell in sim.orchard_map[x]:
         if map_cell.terrain == "path" and len(map_cell.bots) > 0:
           proceed = False
@@ -278,10 +289,9 @@ class bindog(object):
       self.placeBin(sim)
     else:
       bin_id = self.bin
-      print "bin_id: ", bin_id
       self.placeBin(sim)
-      print 'orchard spot: ',sim.orchard_map[self.loc[0]][self.loc[1]].bins
       new_bins = [item for item in sim.orchard_map[self.loc[0]][self.loc[1]].bins if item is not bin_id]
+      sim.orchard_map[self.loc[0]][self.loc[1]].bins.remove(new_bins[0])
       self.bin = new_bins[0]
       sim.bins[self.bin].bot_assigned = True
 
@@ -290,9 +300,11 @@ class bindog(object):
       print "Cannot Get bin, already got one, thanks!"
     elif len(sim.orchard_map[self.loc[0]][self.loc[1]].bins) > 0:
       self.bin = sim.orchard_map[self.loc[0]][self.loc[1]].bins[0]
+      sim.orchard_map[self.loc[0]][self.loc[1]].bins.remove(self.bin)
     elif sim.orchard_map[self.loc[0]][self.loc[1]].terrain == 'depot':
       self.bin = sim.createBin(self.loc)
       sim.bins[self.bin].bot_assigned = True
+      sim.orchard_map[self.loc[0]][self.loc[1]].bins.remove(self.bin)
 
 
   def placeBin(self, sim):
