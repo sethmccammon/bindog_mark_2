@@ -8,10 +8,10 @@ def main():
   num_rows = 1
   row_len = 5
   num_bins = 30
-  num_workers = 2
-  num_bots = 2
+  num_workers = 1
+  num_bots = 1
 
-  coord_method = 1
+  coord_method = 0
 
   num_timestep = 10000
 

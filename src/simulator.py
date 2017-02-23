@@ -4,7 +4,7 @@ import matplotlib.patches as patches
 
 import random, copy, operator
 
-from utils import safeMax
+from utils import safeMax, manhattanDist
 
 
 class simulator(object):
@@ -69,13 +69,13 @@ class simulator(object):
 
 
   def pickFruit(self, worker):
-    worker = self.wkrs[worker]
-    x, y = worker.loc
+    worker_obj = self.wkrs[worker]
+    x, y = worker_obj.loc
     current_cell = self.orchard_map[x][y]
 
     if len(current_cell.bins) > 0:
       current_bin = self.bins[current_cell.bins[0]]
-      max_picked = min((.1 + .1 * random.random())*worker.efficiency, current_bin.capacity)
+      max_picked = min((.1 + .1 * random.random())*worker_obj.efficiency, current_bin.capacity)
       #max_picked = min(.2, self.bins[current_cell.bins[0]].capacity)
 
       total_apples_picked = 0
@@ -96,7 +96,34 @@ class simulator(object):
               self.orchard_map[x+side][y+offset].apples -= orchard_apples_picked
         total_apples_picked += apples_picked_side
       current_bin.capacity -= total_apples_picked
+      if total_apples_picked == 0 and current_bin.capacity != 0:
+        loc = self.findNearApples(worker)
+        if loc is not None:
+          self.orchard_map[self.wkrs[worker].loc[0]][self.wkrs[worker].loc[1]].wkrs.remove(worker)
+          self.wkrs[worker].loc = loc
+          self.orchard_map[loc[0]][loc[1]].wkrs.append(worker)
+    else:
+      if not(self.wkrs[worker].request_akn):
+        self.wkrs[worker].delivery = True
+      else:
+        pass
 
+  def findNearApples(self, worker):
+    print "worker number: ", worker
+    wkr_loc = self.wkrs[worker].loc
+
+    best_loc = None
+    best_dist = float("inf")
+
+    for row_id, row in enumerate(self.orchard_map):
+      for spot_id, spot in enumerate(row):
+        if self.orchard_map[row_id][spot_id].terrain == "path":
+          if (self.orchard_map[row_id-1][spot_id].apples + self.orchard_map[row_id+1][spot_id].apples) > 0:
+            dist = manhattanDist([row_id, spot_id],wkr_loc)
+            if dist < best_dist:
+              best_dist = dist
+              best_loc = [row_id, spot_id]
+    return best_loc
 
 
   def createBin(self, loc):
@@ -315,6 +342,8 @@ class bindog(object):
       sim.bins[self.bin].bot_assigned = False
       sim.orchard_map[self.loc[0]][self.loc[1]].bins.append(self.bin)
       self.bin = None
+      for worker in sim.orchard_map[self.loc[0]][self.loc[1]].wkrs:
+        sim.wkrs[worker].request_akn = False
 
   def moveBot(self, action, sim):
     sim.orchard_map[self.loc[0]][self.loc[1]].bots.remove(self.bot_id)
@@ -348,6 +377,7 @@ class workerGroup(object):
     self.efficiency = .9+random.random()*.2
     self.pickup = False
     self.delivery = False
+    self.request_akn = False
 
 
   def pickupRequest(self):
