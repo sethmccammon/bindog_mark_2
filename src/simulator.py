@@ -53,13 +53,13 @@ class simulator(object):
         self.orchard_map[worker_loc[0]][worker_loc[1]].wkrs.append(worker_id) 
 
     while len(self.bots) < num_bots:
-      bot_loc = [random.randint(0, num_rows*2+1), 0]
+      bot_loc = [random.randint(0, num_rows*2), 0]
       for bot in self.bots:
         if bot_loc == self.bots[bot].loc:
           break
       else:
         bot_id = len(self.bots)
-        self.bots[bot_id] = bindog(bot_loc)
+        self.bots[bot_id] = bindog(bot_loc, bot_id)
         self.orchard_map[bot_loc[0]][bot_loc[1]].bots.append(bot_id)
 
     for bin_id, worker in enumerate(self.wkrs):
@@ -229,7 +229,8 @@ class cell(object):
 
 class bindog(object):
   """docstring for bindog"""
-  def __init__(self, loc):
+  def __init__(self, loc, bot_id):
+    self.bot_id = bot_id
     self.loc = loc
     self.status = "idle" #robot starts idle
     self.target = None #Default no target
@@ -238,13 +239,15 @@ class bindog(object):
 
 
   def takeAction(self, action, sim):
-    x, y, = self.loc
+    x, y = self.loc
     if action == "NORTH":
       proceed = True
 
       for map_cell in sim.orchard_map[x]:
-        if map_cell.terrain == "path" and len(map_cell.bots) > 0:
-          proceed = False
+        print map_cell.terrain, len(map_cell.bots)
+        if map_cell.terrain == "path":
+          if len(map_cell.bots) > 0 and self.bot_id not in map_cell.bots:
+            proceed = False
       if proceed:
         self.moveBot([0, 1], sim)
         self.plan = self.plan[1:]
@@ -314,7 +317,9 @@ class bindog(object):
       self.bin = None
 
   def moveBot(self, action, sim):
+    sim.orchard_map[self.loc[0]][self.loc[1]].bots.remove(self.bot_id)
     self.loc = map(operator.add, self.loc, action) # need to define action
+    sim.orchard_map[self.loc[0]][self.loc[1]].bots.append(self.bot_id)
     if self.bin is not None:
       sim.bins[self.bin].loc = self.loc
 

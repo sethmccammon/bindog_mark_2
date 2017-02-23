@@ -5,10 +5,10 @@ from coordinator import coordinator
 from planner import planner
 
 def main():
-  num_rows = 5
+  num_rows = 1
   row_len = 5
   num_bins = 30
-  num_workers = 4
+  num_workers = 2
   num_bots = 2
 
   coord_method = 1
