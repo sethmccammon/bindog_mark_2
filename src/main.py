@@ -6,11 +6,11 @@ from planner import planner
 import time
 
 def main():
-  num_rows = 10
-  row_len = 10
+  num_rows = 1
+  row_len = 5
   num_bins = 30
-  num_workers = 8
-  num_bots = 5
+  num_workers = 1
+  num_bots = 1
 
   coord_method = 0
 
@@ -39,6 +39,7 @@ def main():
     #raw_input()
     
     sim.step()
+  print "done running"
   plt.show()
   return 0
 

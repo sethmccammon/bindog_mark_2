@@ -305,8 +305,13 @@ class bindog(object):
       self.plan = self.plan[1:]
       return 0
     elif action == "SWAP":
-      self.swapBin(sim)
-      self.plan = self.plan[1:]
+      print "bin capacity: ", sim.bins[sim.orchard_map[x][y].bins[0]].capacity
+      if (sim.bins[sim.orchard_map[x][y].bins[0]].capacity < .01) or (len(sim.orchard_map[x][y].wkrs) == 0):
+        print "swapping bins"
+        self.swapBin(sim)
+        self.plan = self.plan[1:]
+      else:
+        pass
       # self.getBin(sim.orchard_map)
       return 0
     else:
@@ -319,15 +324,14 @@ class bindog(object):
     if len(sim.orchard_map[x][y].bins) == 0:
       self.placeBin(sim)
     else:
-      if sim.bins[sim.orchard_map[self.loc[0]][self.loc[1]].bins[0]].capacity == 0 or len(sim.orchard_map[self.loc[0]][self.loc[1]].wkrs) == 0:
-        bin_id = self.bin
-        self.placeBin(sim)
-        new_bins = [item for item in sim.orchard_map[self.loc[0]][self.loc[1]].bins if item is not bin_id]
-        sim.orchard_map[self.loc[0]][self.loc[1]].bins.remove(new_bins[0])
-        self.bin = new_bins[0]
-        sim.bins[self.bin].bot_assigned = True
-      else:
-        self.plan.insert(0,"SWAP")
+      
+      bin_id = self.bin
+      self.placeBin(sim)
+      new_bins = [item for item in sim.orchard_map[self.loc[0]][self.loc[1]].bins if item is not bin_id]
+      sim.orchard_map[self.loc[0]][self.loc[1]].bins.remove(new_bins[0])
+      self.bin = new_bins[0]
+      sim.bins[self.bin].bot_assigned = True
+
 
   def getBin(self, sim):
     if self.bin is not None:
