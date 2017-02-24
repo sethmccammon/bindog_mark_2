@@ -14,6 +14,7 @@ class simulator(object):
 
     self.num_rows = num_rows
     self.row_size = row_size
+    self.total_apples = 0
 
     self.orchard_map = [[None for ii in range(row_size+2)] for jj in range(3*self.num_rows)]
 
@@ -31,6 +32,7 @@ class simulator(object):
             #self.orchard_map[row_id][spot_id] = "orchard"
           else:
             self.orchard_map[row_id][spot_id] = cell("orchard")
+            self.total_apples += self.orchard_map[row_id][spot_id].apples
             #self.orchard_map[row_id][spot_id] = "path"
 
     self.wkrs = {}
@@ -40,6 +42,8 @@ class simulator(object):
     self.num_bins = num_bins
     self.collected_bins = 0
     self.profit = 0
+    self.apples_picked = 0
+    self.wasted_time = 0
 
     # for ii in range(num_wkrs):
     while len(self.wkrs) < num_wkrs:
@@ -96,6 +100,9 @@ class simulator(object):
               self.orchard_map[x+side][y+offset].apples -= orchard_apples_picked
         total_apples_picked += apples_picked_side
       current_bin.capacity -= total_apples_picked
+      if total_apples_picked == 0:
+        self.wasted_time += 1
+
       if total_apples_picked == 0 and current_bin.capacity != 0:
         loc = self.findNearApples(worker)
         if loc is not None:
@@ -152,6 +159,7 @@ class simulator(object):
         to_remove.append(bin)
     
     for bin in to_remove:
+      self.apples_picked += (1 - self.bins[bin].capacity)
       self.orchard_map[self.bins[bin].loc[0]][self.bins[bin].loc[1]].bins.remove(bin)
       del self.bins[bin]
 
@@ -305,9 +313,7 @@ class bindog(object):
       self.plan = self.plan[1:]
       return 0
     elif action == "SWAP":
-      print "bin capacity: ", sim.bins[sim.orchard_map[x][y].bins[0]].capacity
       if (sim.bins[sim.orchard_map[x][y].bins[0]].capacity < .01) or (len(sim.orchard_map[x][y].wkrs) == 0):
-        print "swapping bins"
         self.swapBin(sim)
         self.plan = self.plan[1:]
       else:

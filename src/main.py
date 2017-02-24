@@ -40,6 +40,10 @@ def main():
     
     sim.step()
   print "done running"
+  print "total num apples: ", sim.total_apples
+  print "num apples picked: ", sim.apples_picked
+  print "percentage picked: ", sim.apples_picked / sim.total_apples * 100
+  print "wasted time: ", sim.wasted_time
   plt.show()
   return 0
 
