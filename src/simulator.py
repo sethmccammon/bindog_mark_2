@@ -109,7 +109,7 @@ class simulator(object):
         pass
 
   def findNearApples(self, worker):
-    print "worker number: ", worker
+    #print "worker number: ", worker
     wkr_loc = self.wkrs[worker].loc
 
     best_loc = None
@@ -190,6 +190,7 @@ class simulator(object):
       drawBin(ax1, self.bins[bin])
 
     plt.show(block=False)
+    plt.pause(0.05)
 
 
   def getIdleBots(self):
@@ -271,7 +272,7 @@ class bindog(object):
       proceed = True
 
       for map_cell in sim.orchard_map[x]:
-        print map_cell.terrain, len(map_cell.bots)
+        #print map_cell.terrain, len(map_cell.bots)
         if map_cell.terrain == "path":
           if len(map_cell.bots) > 0 and self.bot_id not in map_cell.bots:
             proceed = False
@@ -318,12 +319,15 @@ class bindog(object):
     if len(sim.orchard_map[x][y].bins) == 0:
       self.placeBin(sim)
     else:
-      bin_id = self.bin
-      self.placeBin(sim)
-      new_bins = [item for item in sim.orchard_map[self.loc[0]][self.loc[1]].bins if item is not bin_id]
-      sim.orchard_map[self.loc[0]][self.loc[1]].bins.remove(new_bins[0])
-      self.bin = new_bins[0]
-      sim.bins[self.bin].bot_assigned = True
+      if sim.bins[sim.orchard_map[self.loc[0]][self.loc[1]].bins[0]].capacity == 0 or len(sim.orchard_map[self.loc[0]][self.loc[1]].wkrs) == 0:
+        bin_id = self.bin
+        self.placeBin(sim)
+        new_bins = [item for item in sim.orchard_map[self.loc[0]][self.loc[1]].bins if item is not bin_id]
+        sim.orchard_map[self.loc[0]][self.loc[1]].bins.remove(new_bins[0])
+        self.bin = new_bins[0]
+        sim.bins[self.bin].bot_assigned = True
+      else:
+        self.plan.insert(0,"SWAP")
 
   def getBin(self, sim):
     if self.bin is not None:
