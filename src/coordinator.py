@@ -140,7 +140,8 @@ class coordinator():
       for bot in idle_bots:
         plans.append(self.getRobotPlan(bot, simulator))
 
-      plans = self.findNonConflictPlan(plans)
+      if len(plans) > 1:
+      	plans = self.findNonConflictPlan(plans)
 
       for plan in plans:
         if plan != []:
