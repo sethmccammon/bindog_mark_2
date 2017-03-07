@@ -202,11 +202,12 @@ class coordinator():
 
     for i, plan in enumerate(plans):
       for j in range(i+1,len(plans)):
-        if plan[1] == plans[j][1]: 
-          if plan[2] <= plans[j][2]:
-            to_remove.append(plans[j])
-          else:
-            to_remove.append(plan)
+        if plans[j] != []:
+	        if plan[1] == plans[j][1]: 
+	          if plan[2] <= plans[j][2]:
+	            to_remove.append(plans[j])
+	          else:
+	            to_remove.append(plan)
     
     for item in to_remove:
       if item in plans:

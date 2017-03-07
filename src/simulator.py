@@ -159,9 +159,10 @@ class simulator(object):
         to_remove.append(bin)
     
     for bin in to_remove:
-      self.apples_picked += (1 - self.bins[bin].capacity)
-      self.orchard_map[self.bins[bin].loc[0]][self.bins[bin].loc[1]].bins.remove(bin)
-      del self.bins[bin]
+      if len(self.orchard_map[self.bins[bin].loc[0]][self.bins[bin].loc[1]].bins) > 0:
+        self.apples_picked += (1 - self.bins[bin].capacity)
+        self.orchard_map[self.bins[bin].loc[0]][self.bins[bin].loc[1]].bins.remove(bin)
+        del self.bins[bin]
 
 
 
