@@ -118,7 +118,7 @@ class coordinator():
   def binScore(self, bot, bin, simulator):
     score = manhattanDist(simulator.bins[bin].loc, simulator.bots[bot].loc)
 
-    score += simulator.bins[bin].estimateTimeToFull()
+    score += max([simulator.bins[bin].estimateTimeToFull()-score,0])
 
     return score
 
