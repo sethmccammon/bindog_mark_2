@@ -6,13 +6,14 @@ from planner import planner
 import time
 
 def main():
-  num_rows = 1
-  row_len = 5
-  num_bins = 30
-  num_workers = 1
-  num_bots = 1
+  num_rows = 10
+  row_len = 10
+  num_bins = 100
+  num_workers = 10
+  num_bots = 5
 
-  coord_method = 0
+  # 0 = greedy, 1 = auction based, 2= replanning
+  coord_method = 2
 
   num_timestep = 100
 

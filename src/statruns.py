@@ -22,8 +22,8 @@ def statruns():
     num_workers = 10
     num_bots = 5
 
-    # 0 = greedy, 1 = auction based
-    coord_method = 1
+    # 0 = greedy, 1 = auction based, 2= replanning
+    coord_method = 2
 
     num_timestep = 300
 
@@ -53,8 +53,8 @@ def statruns():
         file.write(str(sim.wasted_time))
         file.write("\n")
         print "done running iteration: ", i
-    print "mean: ", np.mean(percent_picked)
-    print "std: ", np.std(percent_picked)
+    print "mean percent picked: ", np.mean(percent_picked)
+    print "std percent picked: ", np.std(percent_picked)
 
 def writeHeader(file, num_rows, row_len, num_bins, num_workers, num_bots, coord_method, num_timestep):
     file.write("parameters\n")
