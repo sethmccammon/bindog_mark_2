@@ -7,7 +7,7 @@ import time
 
 def main():
   num_rows = 10
-  row_len = 10
+  row_len = 20
   num_bins = 100
   num_workers = 10
   num_bots = 5
@@ -29,15 +29,18 @@ def main():
     # for item in plan:
     #   print "Robot: ", item.robot_id
     #   print "Goals: ", item.locations
+    # print "here"
 
     plan = plnr.getPlan(plan, sim)
     # print "Planner Plan", plan
     sim.drawSimulator()
+    # print "apples picked: ",sim.apples_picked
 
 
     # for key in sim.bots.keys():
     #   print key, sim.bots[key].plan
     #raw_input()
+    print timestep
     
     sim.step()
   print "done running"

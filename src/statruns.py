@@ -25,7 +25,7 @@ def statruns():
     # 0 = greedy, 1 = auction based, 2= replanning
     coord_method = 2
 
-    num_timestep = 300
+    num_timestep = 100
 
     writeHeader(file, num_rows, row_len, num_bins, num_workers, num_bots, coord_method, num_timestep)
 

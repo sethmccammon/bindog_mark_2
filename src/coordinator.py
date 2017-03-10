@@ -148,6 +148,7 @@ class coordinator():
       if len(plans) > 1:
       	plans = self.findNonConflictPlan(plans)
 
+
       for plan in plans:
         if plan != []:
           c_bot = plan[0]
@@ -184,7 +185,7 @@ class coordinator():
         for worker in wkrs:
         	simulator.wkrs[worker].request_akn = True
         	simulator.wkrs[worker].delivery = False
-
+        print task_allocation[0].tasks
         idle_bots.remove(c_bot)
 
 
@@ -195,10 +196,24 @@ class coordinator():
   def resetBots(self,simulator):
     #only reset idle bots, or all bots? Maybe just safer to do all bots, the idle bots case is commented below
     for botID in simulator.bots:
-      simulator.bots[botID].status="idle"
-      simulator.bots[botID].target=None
-      simulator.bots[botID].bin=None
-      simulator.bots[botID].plan=[]
+      if(simulator.bots[botID].bin==None):#todo: is this a correct condition?
+      #this becomes a little bit complex because repalnning doesnt' really helo because robots are onyl idle when they don't have bins
+        simulator.bots[botID].status="idle"
+        simulator.bots[botID].target=None
+        simulator.bots[botID].plan=[]
+      # elif(simulator.bots[botID].bin!=None):
+      #   if (simulator.bins[simulator.bots[botID].bin].capacity==1.):
+    
+      #     simulator.bots[botID].status="idle"
+      #     simulator.bots[botID].target=None
+      #     simulator.bots[botID].plan=[]
+      # print simulator.bots[botID].bin
+      # raw_input()
+
+      # else:
+      #   simulator.bots[botID].status="idle"
+      #   simulator.bots[botID].target=None
+      #   simulator.bots[botID].plan=[]
 
     # idle_bots = simulator.getIdleBots() 
     # bots_to_reset=[]
@@ -223,11 +238,6 @@ class coordinator():
   def resetRequests(self,simulator):
     deliveries = simulator.getBinDeliveryRequests() 
 
-    if(len(deliveries)>0):
-      print "Deliveries: ",deliveries
-
-      raw_input()
-
   def resetAck(self,simulator):
     #review how we want to reset the worker groups
     for worker in simulator.wkrs:
@@ -249,64 +259,10 @@ class coordinator():
     self.resetAck(simulator)
 
     #now this should just be returning all of the bins, this doesn't seem to be returning anything?
-    deliverys = simulator.getBinDeliveryRequests() 
-
-    # While still robots without plans
-    still_planning = True
-    idle_bots = simulator.getIdleBots()
-    prev_idle = copy.deepcopy(idle_bots)
-
-    while still_planning:
-      
-      plans = []
-      for bot in idle_bots:
-        plans.append(self.getRobotPlan(bot, simulator))
-
-      if len(plans) > 1:
-        plans = self.findNonConflictPlan(plans)
-
-      for plan in plans:
-        if plan != []:
-          c_bot = plan[0]
-          loc = simulator.bins[plan[1]].loc
-          end_loc = [loc[0], 0]
-          simulator.bins[plan[1]].bot_assigned = True
-          idle_bots.remove(c_bot)
-          if len(simulator.orchard_map[loc[0]][loc[1]].wkrs) == 0:
-            task_allocation.append(robotTask(bot, [loc, end_loc], ['get', 'place']))
-          else:
-            if simulator.bots[c_bot].hasBin():
-              task_allocation.append(robotTask(c_bot, [loc, end_loc], ['swap','place']))
-            else:
-              # Getting a bin then moving to goal location
-              r_loc = simulator.bots[c_bot].loc
-              r_loc = [r_loc[0],0]
-              task_allocation.append(robotTask(c_bot, [r_loc,loc,end_loc],['get', 'swap','place']))
+    
 
 
-      still_planning = not(idle_bots == [] or prev_idle == idle_bots)
-      prev_idle = copy.deepcopy(idle_bots)
-
-    for loc in deliverys:
-      if idle_bots != []:
-        c_bot = self.findClosestBot(loc, idle_bots, simulator)
-        if simulator.bots[c_bot].hasBin():
-          task_allocation.append(robotTask(c_bot, [loc], ['place']))
-        else:
-          # Getting a bin then moving to goal location
-          r_loc = simulator.bots[c_bot].loc
-          r_loc = [r_loc[0],0]
-          task_allocation.append(robotTask(c_bot, [r_loc,loc],['get', 'place']))
-        wkrs = simulator.orchard_map[loc[0]][loc[1]].wkrs
-        for worker in wkrs:
-          simulator.wkrs[worker].request_akn = True
-          simulator.wkrs[worker].delivery = False
-
-        idle_bots.remove(c_bot)
-
-
-
-    return task_allocation
+    return self.auctionCord(simulator)
 
 
   def getRobotPlan(self, bot, simulator):
