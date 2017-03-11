@@ -72,6 +72,15 @@ class simulator(object):
       self.orchard_map[bin_loc[0]][bin_loc[1]].bins.append(bin_id)
 
 
+  def applesLeft(self):
+    apples_left = 0
+    for row_id, row in enumerate(self.orchard_map):
+      for spot_id, spot in enumerate(row):
+        if self.orchard_map[row_id][spot_id].terrain == "orchard":
+          apples_left += self.orchard_map[row_id][spot_id].apples
+    return apples_left
+
+
   def pickFruit(self, worker):
     worker_obj = self.wkrs[worker]
     x, y = worker_obj.loc
@@ -162,8 +171,9 @@ class simulator(object):
     for bin in to_remove:
       if len(self.orchard_map[self.bins[bin].loc[0]][self.bins[bin].loc[1]].bins) > 0:
         self.apples_picked += (1 - self.bins[bin].capacity)
-        self.orchard_map[self.bins[bin].loc[0]][self.bins[bin].loc[1]].bins.remove(bin)
-        del self.bins[bin]
+        if bin in self.orchard_map[self.bins[bin].loc[0]][self.bins[bin].loc[1]].bins:
+          self.orchard_map[self.bins[bin].loc[0]][self.bins[bin].loc[1]].bins.remove(bin)
+          del self.bins[bin]
 
 
 

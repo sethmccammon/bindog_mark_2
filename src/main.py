@@ -25,7 +25,7 @@ def main():
 
   for timestep in range(num_timestep):
     plan = coord.cordStep(sim)
-    print sim.getIdleBots()
+    # print sim.getIdleBots()
     # for item in plan:
     #   print "Robot: ", item.robot_id
     #   print "Goals: ", item.locations

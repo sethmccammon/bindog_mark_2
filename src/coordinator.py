@@ -68,16 +68,16 @@ class coordinator():
 
         if len(simulator.orchard_map[loc[0]][loc[1]].wkrs) == 0:
           task_allocation.append(robotTask(bot, [loc, end_loc], ['get', 'place']))
-      	else:
-	        if simulator.bots[bot].hasBin():
-	          #task_allocation.append([bot, [loc], ['get']])
-	          task_allocation.append(robotTask(bot, [loc, end_loc], ['swap', 'place']))
-	        else:
-	          # Getting a bin then moving to goal location
-	          r_loc = simulator.bots[bot].loc
-	          r_loc = [r_loc[0],0]
-	          #task_allocation.append([bot, [r_loc,loc],['get', 'get']])
-	          task_allocation.append(robotTask(bot, [r_loc,loc,end_loc], ['get', 'swap', 'place']))
+        else:
+          if simulator.bots[bot].hasBin():
+            #task_allocation.append([bot, [loc], ['get']])
+            task_allocation.append(robotTask(bot, [loc, end_loc], ['swap', 'place']))
+          else:
+            # Getting a bin then moving to goal location
+            r_loc = simulator.bots[bot].loc
+            r_loc = [r_loc[0],0]
+            #task_allocation.append([bot, [r_loc,loc],['get', 'get']])
+            task_allocation.append(robotTask(bot, [r_loc,loc,end_loc], ['get', 'swap', 'place']))
         assigned_bots.append(bot)
 
     for bot in assigned_bots:
@@ -98,8 +98,8 @@ class coordinator():
         
         wkrs = simulator.orchard_map[loc[0]][loc[1]].wkrs
         for worker in wkrs:
-        	simulator.wkrs[worker].request_akn = True
-        	simulator.wkrs[worker].delivery = False
+          simulator.wkrs[worker].request_akn = True
+          simulator.wkrs[worker].delivery = False
 
         idle_bots.remove(c_bot)
 
@@ -146,7 +146,7 @@ class coordinator():
         plans.append(self.getRobotPlan(bot, simulator))
 
       if len(plans) > 1:
-      	plans = self.findNonConflictPlan(plans)
+        plans = self.findNonConflictPlan(plans)
 
 
       for plan in plans:
@@ -156,16 +156,20 @@ class coordinator():
           end_loc = [loc[0], 0]
           simulator.bins[plan[1]].bot_assigned = True
           idle_bots.remove(c_bot)
-          if len(simulator.orchard_map[loc[0]][loc[1]].wkrs) == 0:
-          	task_allocation.append(robotTask(bot, [loc, end_loc], ['get', 'place']))
-      	  else:
-	          if simulator.bots[c_bot].hasBin():
-	            task_allocation.append(robotTask(c_bot, [loc, end_loc], ['swap','place']))
-	          else:
-	            # Getting a bin then moving to goal location
-	            r_loc = simulator.bots[c_bot].loc
-	            r_loc = [r_loc[0],0]
-	            task_allocation.append(robotTask(c_bot, [r_loc,loc,end_loc],['get', 'swap','place']))
+          if len(simulator.orchard_map[loc[0]][loc[1]].bins) == 0:
+            if simulator.bots[c_bot].hasBin():
+              task_allocation.append(robotTask(bot, [end_loc], ['place']))
+            else:
+              task_allocation.append(robotTask(bot, [loc, end_loc], ['get', 'place']))
+          else:
+            if simulator.bots[c_bot].hasBin():
+              #print "condition 2"
+              task_allocation.append(robotTask(c_bot, [loc, end_loc], ['swap','place']))
+            else:
+              # Getting a bin then moving to goal location
+              r_loc = simulator.bots[c_bot].loc
+              r_loc = [r_loc[0],0]
+              task_allocation.append(robotTask(c_bot, [r_loc,loc,end_loc],['get', 'swap','place']))
 
 
       still_planning = not(idle_bots == [] or prev_idle == idle_bots)
@@ -183,8 +187,8 @@ class coordinator():
           task_allocation.append(robotTask(c_bot, [r_loc,loc],['get', 'place']))
         wkrs = simulator.orchard_map[loc[0]][loc[1]].wkrs
         for worker in wkrs:
-        	simulator.wkrs[worker].request_akn = True
-        	simulator.wkrs[worker].delivery = False
+          simulator.wkrs[worker].request_akn = True
+          simulator.wkrs[worker].delivery = False
         print task_allocation[0].tasks
         idle_bots.remove(c_bot)
 
@@ -197,13 +201,13 @@ class coordinator():
     #only reset idle bots, or all bots? Maybe just safer to do all bots, the idle bots case is commented below
     for botID in simulator.bots:
       if simulator.bots[botID].bin is not None:
-      	if(simulator.bins[simulator.bots[botID].bin].capacity == 1):#todo: is this a correct condition?
+        if(simulator.bins[simulator.bots[botID].bin].capacity == 1):#todo: is this a correct condition?
       #this becomes a little bit complex because repalnning doesnt' really helo because robots are onyl idle when they don't have bins
           simulator.bots[botID].status="idle"
           simulator.bots[botID].target=None
           simulator.bots[botID].plan=[]
       else:
-      	  simulator.bots[botID].status="idle"
+          simulator.bots[botID].status="idle"
           simulator.bots[botID].target=None
           simulator.bots[botID].plan=[]
       # elif(simulator.bots[botID].bin!=None):
@@ -286,11 +290,11 @@ class coordinator():
     for i, plan in enumerate(plans):
       for j in range(i+1,len(plans)):
         if plans[j] != []:
-	        if plan[1] == plans[j][1]: 
-	          if plan[2] <= plans[j][2]:
-	            to_remove.append(plans[j])
-	          else:
-	            to_remove.append(plan)
+          if plan[1] == plans[j][1]: 
+            if plan[2] <= plans[j][2]:
+              to_remove.append(plans[j])
+            else:
+              to_remove.append(plan)
     
     for item in to_remove:
       if item in plans:
