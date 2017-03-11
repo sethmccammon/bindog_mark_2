@@ -16,16 +16,16 @@ def statruns():
 
     file = open(output_file,'w')
 
-    num_rows = 20
-    row_len = 20
+    num_rows = 10
+    row_len = 8
     num_bins = 100
-    num_workers = 10
+    num_workers = 8
     num_bots = 5
 
     # 0 = greedy, 1 = auction based, 2= replanning
-    coord_method = 2
+    coord_method = 1
 
-    num_timestep = 100
+    num_timestep = 300
 
     writeHeader(file, num_rows, row_len, num_bins, num_workers, num_bots, coord_method, num_timestep)
 

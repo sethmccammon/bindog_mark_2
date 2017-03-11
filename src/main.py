@@ -7,13 +7,13 @@ import time
 
 def main():
   num_rows = 10
-  row_len = 20
+  row_len = 8
   num_bins = 100
-  num_workers = 10
+  num_workers = 8
   num_bots = 5
 
   # 0 = greedy, 1 = auction based, 2= replanning
-  coord_method = 2
+  coord_method = 0
 
   num_timestep = 100
 
@@ -25,7 +25,7 @@ def main():
 
   for timestep in range(num_timestep):
     plan = coord.cordStep(sim)
-
+    print sim.getIdleBots()
     # for item in plan:
     #   print "Robot: ", item.robot_id
     #   print "Goals: ", item.locations

@@ -79,7 +79,8 @@ class simulator(object):
 
     if len(current_cell.bins) > 0:
       current_bin = self.bins[current_cell.bins[0]]
-      max_picked = min((.1 + .1 * random.random())*worker_obj.efficiency, current_bin.capacity)
+      #max_picked = min((.1 + .1 * random.random())*worker_obj.efficiency, current_bin.capacity)
+      max_picked = min((.02 + .02 * random.random())*worker_obj.efficiency, current_bin.capacity)
       #max_picked = min(.2, self.bins[current_cell.bins[0]].capacity)
 
       total_apples_picked = 0
@@ -380,7 +381,7 @@ class orchardBin(object):
     self.bot_assigned = False
 
   def estimateTimeToFull(self):
-    picking_rate = .15
+    picking_rate = .03
     return self.capacity / picking_rate
 
 

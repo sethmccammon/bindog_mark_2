@@ -196,11 +196,16 @@ class coordinator():
   def resetBots(self,simulator):
     #only reset idle bots, or all bots? Maybe just safer to do all bots, the idle bots case is commented below
     for botID in simulator.bots:
-      if(simulator.bots[botID].bin==None):#todo: is this a correct condition?
+      if simulator.bots[botID].bin is not None:
+      	if(simulator.bins[simulator.bots[botID].bin].capacity == 1):#todo: is this a correct condition?
       #this becomes a little bit complex because repalnning doesnt' really helo because robots are onyl idle when they don't have bins
-        simulator.bots[botID].status="idle"
-        simulator.bots[botID].target=None
-        simulator.bots[botID].plan=[]
+          simulator.bots[botID].status="idle"
+          simulator.bots[botID].target=None
+          simulator.bots[botID].plan=[]
+      else:
+      	  simulator.bots[botID].status="idle"
+          simulator.bots[botID].target=None
+          simulator.bots[botID].plan=[]
       # elif(simulator.bots[botID].bin!=None):
       #   if (simulator.bins[simulator.bots[botID].bin].capacity==1.):
     
