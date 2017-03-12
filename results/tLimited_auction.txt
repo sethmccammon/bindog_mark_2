@@ -1,11 +1,11 @@
 parameters
 ------------------------------------------------------------------
-num_rows: 1
-row_len: 5
+num_rows: 10
+row_len: 8
 num_bins: 100
-num_workers: 1
-num_bots: 2
-coord method: 1
+num_workers: 15
+num_bots: 8
+coord method: 2
 num_timestep: 0
 ------------------------------------------------------------------
 percentage picked, time wasted

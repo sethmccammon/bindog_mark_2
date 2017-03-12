@@ -23,11 +23,14 @@ class coordinator():
 
   def __init__ (self, cord_method = 0):
     if cord_method == 0:
-      print "Starting Greedy Coord"
+      #print "Starting Greedy Coord"
+      pass
     elif cord_method == 1:
-      print "Starting Auction Coord"
+      #print "Starting Auction Coord"
+      pass
     elif cord_method == 2:
-      print "Starting Online replanning Coord"
+      #print "Starting Online replanning Coord"
+      pass
     else:
       print "Invalid ID"
       return 0
@@ -156,20 +159,20 @@ class coordinator():
           end_loc = [loc[0], 0]
           simulator.bins[plan[1]].bot_assigned = True
           idle_bots.remove(c_bot)
-          if len(simulator.orchard_map[loc[0]][loc[1]].bins) == 0:
+          r_loc = simulator.bots[c_bot].loc
+          r_loc = [r_loc[0],0]
+          if len(simulator.orchard_map[loc[0]][loc[1]].wkrs) == 0:
             if simulator.bots[c_bot].hasBin():
-              task_allocation.append(robotTask(bot, [end_loc], ['place']))
+              task_allocation.append(robotTask(bot, [simulator.bots[c_bot].loc, loc, end_loc], ['place', 'get', 'place']))
             else:
               task_allocation.append(robotTask(bot, [loc, end_loc], ['get', 'place']))
           else:
             if simulator.bots[c_bot].hasBin():
               #print "condition 2"
-              task_allocation.append(robotTask(c_bot, [loc, end_loc], ['swap','place']))
+              task_allocation.append(robotTask(c_bot, [loc, end_loc], ['swap', 'place']))
             else:
               # Getting a bin then moving to goal location
-              r_loc = simulator.bots[c_bot].loc
-              r_loc = [r_loc[0],0]
-              task_allocation.append(robotTask(c_bot, [r_loc,loc,end_loc],['get', 'swap','place']))
+              task_allocation.append(robotTask(c_bot, [r_loc,loc,end_loc],['get', 'swap', 'place']))
 
 
       still_planning = not(idle_bots == [] or prev_idle == idle_bots)
@@ -189,7 +192,7 @@ class coordinator():
         for worker in wkrs:
           simulator.wkrs[worker].request_akn = True
           simulator.wkrs[worker].delivery = False
-        print task_allocation[0].tasks
+        #print task_allocation[0].tasks
         idle_bots.remove(c_bot)
 
 

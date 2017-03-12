@@ -89,7 +89,7 @@ class simulator(object):
     if len(current_cell.bins) > 0:
       current_bin = self.bins[current_cell.bins[0]]
       #max_picked = min((.1 + .1 * random.random())*worker_obj.efficiency, current_bin.capacity)
-      max_picked = min((.02 + .02 * random.random())*worker_obj.efficiency, current_bin.capacity)
+      max_picked = min((.01 + .01 * random.random())*worker_obj.efficiency, current_bin.capacity)
       #max_picked = min(.2, self.bins[current_cell.bins[0]].capacity)
 
       total_apples_picked = 0
@@ -325,9 +325,14 @@ class bindog(object):
       self.plan = self.plan[1:]
       return 0
     elif action == "SWAP":
-      if (sim.bins[sim.orchard_map[x][y].bins[0]].capacity < .01) or (len(sim.orchard_map[x][y].wkrs) == 0):
-        self.swapBin(sim)
-        self.plan = self.plan[1:]
+      if len(sim.orchard_map[x][y].bins) != 0:
+        
+        if (sim.bins[sim.orchard_map[x][y].bins[0]].capacity < .01) or (len(sim.orchard_map[x][y].wkrs) == 0):
+          self.swapBin(sim)
+          self.plan = self.plan[1:]
+        else:
+            pass
+      
       else:
         pass
       # self.getBin(sim.orchard_map)
