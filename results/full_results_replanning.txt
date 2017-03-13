@@ -1,2 +1,0 @@
-num_workers, num_bots, coor_method, percent_picked_mean, percent_picked_sd, time_wasted_mean, time_wasted_sd
-4, 2, 2, 5.81946502104, 0.0, 84.0, 0.0

@@ -12,7 +12,7 @@ def statrunsNumSteps():
 
     num_runs = 100
 
-    output_file = "../results/full_results_greedy_auction.txt"
+    output_file = "../results/full_results_replan.txt"
 
     file = open(output_file,'w')
 
@@ -23,8 +23,8 @@ def statrunsNumSteps():
     num_bots = [2,4,6,8,10,12,14,16,18,20]
 
     # 0 = greedy, 1 = auction based, 2= replanning
-    coord_method = [0,1]
-    #coord_method = [2]
+    #coord_method = [0,1]
+    coord_method = [2]
 
     num_timestep = 300
 

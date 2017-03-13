@@ -191,7 +191,7 @@ class simulator(object):
       for col_id, item in enumerate(row):
         if item.terrain == "orchard":
           ax1.add_patch(patches.Rectangle((row_id-.5, col_id-.5), 1., 1., facecolor="#228b22"))
-          plt.text(row_id, col_id, str(item.apples)[:4])
+          #plt.text(row_id, col_id, str(item.apples)[:4])
         elif item.terrain == "headlands":
           ax1.add_patch(patches.Rectangle((row_id-.5, col_id-.5), 1., 1., facecolor="#776b46"))
         elif item.terrain == "depot":
@@ -425,8 +425,10 @@ if __name__ == '__main__':
   # num_bots = 5
   # num_bins = 30
   # num_wkrs = 5
-  sim = simulator(5, 5, 1, 30, 1)
+  sim = simulator(15, 8, 4, 30, 12)
   bot = sim.bots[sim.bots.keys()[0]]
+  sim.drawSimulator()
+  raw_input()
   bot.plan = ["N", "S", "E", "W"]
   sim.step()
   print bot.loc
